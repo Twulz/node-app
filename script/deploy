@@ -1,0 +1,8 @@
+#!/bin/sh
+ssh twulz@157.245.55.163 <<EOF
+ cd ~/node-app
+ git pull
+ npm install — production
+ pm2 restart all
+ exit
+EOF
