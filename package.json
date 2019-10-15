@@ -4,6 +4,7 @@
     "version": "0.0.3",
     "private": true,
     "scripts": {
+        "test": "./node_modules/.bin/mocha ./test/test.js --exit",
         "dev-server": "./node_modules/.bin/node-dev ./index.js"
     },
     "dependencies": {
@@ -12,6 +13,8 @@
         "npm": "^6.10.2"
     },
     "devDependencies": {
+        "chai": "^4.2.0",
+        "chai-http": "^4.3.0",
         "mocha": "^6.2.0",
         "node-dev": "^4.0.0",
         "supertest": "^4.0.2"

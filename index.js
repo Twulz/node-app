@@ -4,8 +4,6 @@ const logger = require('morgan');
 const bodyParser = require('body-parser');
 const logging = true;
 
-var exports = module.exports = {};
-
 let app = express();
 app.use(bodyParser.json());
 app.use(logger('dev'));
@@ -27,10 +25,12 @@ app.use(function (err, req, res, next) {
 });
 
 // Start the server
-var server = app.listen(3000, function() {
+var server = app.listen(process.env.PORT || 3000, function() {
     console.log('Server started on port 3000...');
 });
 
 exports.closeServer = function() {
     server.close();
 };
+
+module.exports = app;
