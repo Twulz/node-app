@@ -1,14 +1,19 @@
 {
     "name": "node-app",
-    "description": "hello jenkins test app",
-    "version": "0.0.2",
+    "description": "Node Test App",
+    "version": "0.0.3",
     "private": true,
+    "scripts": {
+        "dev-server": "./node_modules/.bin/node-dev ./index.js"
+    },
     "dependencies": {
         "express": "^4.17.1",
+        "morgan": "^1.9.1",
         "npm": "^6.10.2"
     },
     "devDependencies": {
         "mocha": "^6.2.0",
+        "node-dev": "^4.0.0",
         "supertest": "^4.0.2"
     }
 }
