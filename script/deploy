@@ -1,5 +1,5 @@
 #!/bin/sh
-ssh twulz@157.245.55.163 <<EOF
+ssh twulz@$1 <<EOF
  cd ~/node-app
  git pull
  npm install -—production
