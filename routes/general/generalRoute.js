@@ -9,7 +9,7 @@ router.get('/', async (req, res, next) => {
         res.setHeader('content-type', 'application/json');
         // if (logging) { console.log("GET request"); }
         res.statusCode = 200;
-        res.send(JSON.stringify({"status": 200, "error": null, "response": "Hello World! New Server5 Success!"}));
+        res.send(JSON.stringify({"status": 200, "error": null, "response": "Hello World! New Server6 Success!"}));
     } catch (err) {
         return next(err);
     }
