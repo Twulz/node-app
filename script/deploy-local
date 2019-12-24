@@ -1,9 +1,15 @@
 #!/bin/sh
-echo 'Changing to node-app directory...'
+echo '>>Changing to node-app directory...'
 cd ~/node-app
-echo 'Git Pull...'
+echo '>>Git Pull...'
 git pull
-echo 'Install Production environment for Node-App...'
+echo '>>Install Production environment for Node-App...'
 npm install -—production
-echo 'Restart all processes...'
-pm2 restart all
+echo '>>Start/restart all processes...'
+pm2 describe index > /dev/null
+RUNNING=$?
+if [ "${RUNNING}" -ne 0 ]; then
+  pm2 start ./index.js
+else
+  pm2 restart all
+fi;
