@@ -9,7 +9,9 @@ echo '>>Start/restart all processes...'
 pm2 describe index > /dev/null
 RUNNING=$?
 if [ "${RUNNING}" -ne 0 ]; then
+  echo '>Index not started, starting process...'
   pm2 start ./index.js
 else
+  '>Index started, restarting process...'
   pm2 restart all
 fi;
