@@ -2,5 +2,10 @@
 cd ~/node-app
 git pull
 npm install -—production
-pm2 restart all
+if (pm2 pid node-app)
+then
+    pm2 restart node-app
+else
+    pm2 start index.js --name "node-app"
+fi
 exit
