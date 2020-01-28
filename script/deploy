@@ -2,10 +2,5 @@
 cd ~/node-app
 git pull
 npm install -—production
-if (pm2 pid node-app)
-then
-    pm2 restart node-app
-else
-    pm2 start index.js --name "node-app"
-fi
+(pm2 restart node-app) || (pm2 start index.js --name "node-app")
 exit
