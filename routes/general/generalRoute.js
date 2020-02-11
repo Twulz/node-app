@@ -15,4 +15,16 @@ router.get('/', async (req, res, next) => {
     }
 });
 
+// Respond with "hello world" for requests to root "/"}
+router.get('/jenkins', async (req, res, next) => {
+    try {
+        res.setHeader('content-type', 'application/json');
+        // if (logging) { console.log("GET request"); }
+        res.statusCode = 200;
+        res.send(JSON.stringify({"status": 200, "error": null, "response": "You done goofed, this is the Node-App!"}));
+    } catch (err) {
+        return next(err);
+    }
+});
+
 module.exports = router;
