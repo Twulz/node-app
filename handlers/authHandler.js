@@ -12,7 +12,8 @@ var checkToken = function(req, res, next) {
         }
         jwt.verify(token, secret, (err, decoded) => {
             if (err) {
-                return next('Token is invalid');
+                res.statusCode = 401;
+                return next('Authentication failed! Credentials are invalid');
             } else {
                 req.decoded = decoded;
                 next();
@@ -20,7 +21,7 @@ var checkToken = function(req, res, next) {
         });
     } else {
         res.statusCode = 400;
-        return next('Auth token is not supplied');
+        return next('Authentication failed! Please check the request');
     }
 };
 

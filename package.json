@@ -4,7 +4,7 @@
     "version": "0.0.3",
     "private": true,
     "scripts": {
-        "test": "./node_modules/.bin/mocha ./test/test.js --exit",
+        "test": "mocha --recursive --timeout 100000 --exit",
         "dev-server": "./node_modules/.bin/node-dev ./index.js"
     },
     "dependencies": {

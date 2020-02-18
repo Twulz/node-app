@@ -7,15 +7,12 @@ const { expect } = chai;
 chai.use(chaiHttp);
 
 describe('GET /', function() {
-    it('Respond with success', function(done) {
-        chai
-            .request(app)
+    it('Respond with fail', function(done) {
+        request(app)
             .get('/')
-            .set({'Accept': 'application/json'})
+            .set('Accept', 'application/json')
             .end(function(err, res) {
-                expect(res).to.exist;
-                expect(res.statusCode).to.equal(200);
-                expect(res.body.response).to.include('Success');
+                expect(res.statusCode).to.equal(400);
                 done();
             })
     });
@@ -23,12 +20,11 @@ describe('GET /', function() {
 
 describe('POST /', function() {
     it('Respond with fail', function(done) {
-        chai
-            .request(app)
+        request(app)
             .post('/')
             .set('Accept', 'application/json')
             .end(function(err, res) {
-                expect(res.statusCode).to.equal(404);
+                expect(res.statusCode).to.equal(400);
                 done();
             })
     });
