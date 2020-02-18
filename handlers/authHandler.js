@@ -4,36 +4,24 @@ const secret = process.env['SECRET'];
 const logging = process.env['LOGGING'];
 
 var checkToken = function(req, res, next) {
-        let token = req.headers['x-access-token'] || req.headers['authorization']; // Express headers are auto converted to lowercase
-        if (token == null) {
-            return res.json({
-                success: false,
-                message: 'Token not provided'
-            });
-        }
+    let token = req.headers['x-access-token'] || req.headers['authorization'];
+    if (token) {
         if (token.startsWith('Bearer ')) {
-        // Remove Bearer from string
-        token = token.slice(7, token.length);
+            // Remove Bearer from string
+            token = token.slice(7, token.length);
         }
-    
-        if (token) {
         jwt.verify(token, secret, (err, decoded) => {
             if (err) {
-            return res.json({
-                success: false,
-                message: 'Token is not valid'
-            });
+                return next('Token is invalid');
             } else {
-            req.decoded = decoded;
-            next();
+                req.decoded = decoded;
+                next();
             }
         });
-        } else {
-        return res.json({
-            success: false,
-            message: 'Auth token is not supplied'
-        });
-        }
-    };
+    } else {
+        res.statusCode = 400;
+        return next('Auth token is not supplied');
+    }
+};
 
 module.exports = checkToken;

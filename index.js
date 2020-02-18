@@ -21,7 +21,8 @@ app.use(function (err, req, res, next) {
 	}
 	// Return an error code
     res.json({
-		status: res.statusCode,
+        success: false,
+        status: res.statusCode,
         error: new String(err),
     })
 });

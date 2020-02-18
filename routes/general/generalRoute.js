@@ -9,7 +9,10 @@ router.get('/', async (req, res, next) => {
         res.setHeader('content-type', 'application/json');
         // if (logging) { console.log("GET request"); }
         res.statusCode = 200;
-        res.send(JSON.stringify({"status": 200, "error": null, "response": "Hello World Success!"}));
+        res.json({
+            success: true,
+            response: "Hello World Success!"
+        });
     } catch (err) {
         return next(err);
     }
@@ -21,7 +24,10 @@ router.get('/jenkins', async (req, res, next) => {
         res.setHeader('content-type', 'application/json');
         // if (logging) { console.log("GET request"); }
         res.statusCode = 200;
-        res.send(JSON.stringify({"status": 200, "error": null, "response": "You done goofed, this is the Node-App!"}));
+        res.json({
+            success: true, 
+            response: "You done goofed, this is the Node-App!"
+        });
     } catch (err) {
         return next(err);
     }

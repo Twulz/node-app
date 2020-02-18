@@ -5,37 +5,41 @@ require('dotenv').config({path: './.env'});
 const secret = process.env['SECRET'];
 const logging = process.env['LOGGING'];
 
-router.post('/login', async(req, res) => {
+router.post('/login', async(req, res, next) => {
+    try {
+        let username = req.body.username;
+        let password = req.body.password;
+        // For the given username fetch user from DB
+        let mockedUsername = 'admin';
+        let mockedPassword = 'password';
 
-    let username = req.body.username;
-    let password = req.body.password;
-    // For the given username fetch user from DB
-    let mockedUsername = 'admin';
-    let mockedPassword = 'password';
+        res.setHeader('content-type', 'application/json');
 
-    if (username && password) {
-        if (username === mockedUsername && password === mockedPassword) {
-        let token = jwt.sign({username: username},
-            secret,
-            { expiresIn: '24h' }
-        );
-        // return the JWT token for the future API calls
-        res.json({
-            success: true,
-            message: 'Authentication successful!',
-            token: token
-        });
+        if (username && password) {
+            if (username === mockedUsername && password === mockedPassword) {
+            let token = jwt.sign(
+                {username: username},
+                secret,
+                { expiresIn: '24h' }
+            );
+            // return the JWT token for the future API calls
+            res.statusCode = 200;
+            res.json({
+                success: true,
+                response: 'Authentication successful!',
+                token: token
+            });
+            } else {
+                res.statusCode = 401;
+                err = 'Incorrect username or password';
+                return next(err);
+            }
         } else {
-        res.send(403).json({
-            success: false,
-            message: 'Incorrect username or password'
-        });
+            res.statusCode = 400;
+            return next('Authentication failed! Please check the request');
         }
-    } else {
-        res.send(400).json({
-        success: false,
-        message: 'Authentication failed! Please check the request'
-        });
+    } catch (err) {
+        return next(err);
     }
 });
   
