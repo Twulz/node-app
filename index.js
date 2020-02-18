@@ -2,12 +2,14 @@
 const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
-const logging = true;
 
 let app = express();
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(logger('dev'));
 
+app.use(require('./routes/general/authentication.js'));
+app.use(require('./handlers/authHandler.js'));
 app.use(require('./routes/general/generalRoute.js'));
 
 // General error handler, needs to be defined AFTER all other routes
