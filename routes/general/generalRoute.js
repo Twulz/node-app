@@ -3,7 +3,14 @@ var router = express.Router();
 
 const logging = true;
 
-// Respond with "hello world" for requests to root "/"}
+/**
+Hello World
+@returns 
+{ 
+    success: { true | false },
+    response: { String }
+}
+*/
 router.get('/', async (req, res, next) => {
     try {
         res.setHeader('content-type', 'application/json');
@@ -12,21 +19,6 @@ router.get('/', async (req, res, next) => {
         res.json({
             success: true,
             response: "Hello World Success!"
-        });
-    } catch (err) {
-        return next(err);
-    }
-});
-
-// Respond with "hello world" for requests to root "/"}
-router.get('/jenkins', async (req, res, next) => {
-    try {
-        res.setHeader('content-type', 'application/json');
-        // if (logging) { console.log("GET request"); }
-        res.statusCode = 200;
-        res.json({
-            success: true, 
-            response: "You done goofed, this is the Node-App!"
         });
     } catch (err) {
         return next(err);
