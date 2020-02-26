@@ -25,7 +25,7 @@ class Database {
             .dropTableIfExists('authentication')
             .createTable('authentication', tb => {
                 tb.increments('auth_id')
-                tb.string('username').notNullable()
+                tb.string('username').notNullable().unique()
                 tb.specificType('password', 'CHAR(60)').notNullable()
                 tb.boolean('app_access').notNullable().defaultTo('false')
             })
@@ -72,7 +72,7 @@ class Database {
     @param { string } username: The username (email address) of the user
     @returns { CHAR(60) } password: A salted hash generated from the user's inputted password
     */
-    getUserAuthData(username) {
+    getHashedPassword(username) {
         return this.knex
             .select('password')
             .from('authentication')
@@ -80,6 +80,21 @@ class Database {
             .first()
             .then((result) => {return result.password})
     }
+
+    /**
+    Returns if the user has permission to access the app
+    @param { string } username: The username (email address) of the user
+    @returns { true | false } result: true if the user has permission to access the app
+    */
+    getUserAuthData(username) {
+        return this.knex
+            .select('app_access')
+            .from('authentication')
+            .where('username', username)
+            .first()
+            .then((result) => {return result.app_access})
+    }
+    
 }
 
 module.exports = Database;

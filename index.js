@@ -2,10 +2,12 @@ require('dotenv').config({path: './.env'});
 const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
+const expressSanitizer = require('express-sanitizer');
 
 let app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(expressSanitizer());
 app.use(logger('dev'));
 
 app.use(require('./routes/general/authentication.js'));

@@ -3,8 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const Database = require('../../database/database');
-
-const { check, oneOf, validationResult } = require('express-validator');
+const { check, validationResult } = require('express-validator');
 
 require('dotenv').config({path: './.env'});
 require('util');
@@ -30,30 +29,46 @@ Allows a user to log in to the system - is issued a JWT token
     token: { String }
 }
 */
-router.post('/login', async(req, res, next) => {
+router.post('/login', [ 
+  check('username').exists().escape().isEmail(),
+  check('password').exists().escape()
+  ], async(req, res, next) => {
     try {
+
+        // Check for validation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            res.statusCode = 400;
+            return next('Authentication failed! Please check the request');
+        }
+
         res.setHeader('content-type', 'application/json');
 
         if (req.body.username && req.body.password) {
-            var dbhash = await db.getUserAuthData(req.body.username);
-            bcrypt.compare(req.body.password, dbhash, function(err, result) {
+            var dbhash = await db.getHashedPassword(req.body.username);
+            bcrypt.compare(req.body.password, dbhash, async function(err, result) {
                 if (result) {
-                    let token = jwt.sign(
-                        {username: req.body.username},
-                        secret,
-                        { expiresIn: '24h' }
-                    );
-                    // return the JWT token for the future API calls
-                    res.statusCode = 200;
-                    res.json({
-                        success: true,
-                        response: 'Authentication successful!',
-                        token: token
-                    });
+                    var app_access = await db.getUserAuthData(req.body.username);
+                    if (app_access) {
+                        let token = jwt.sign(
+                            {username: req.body.username},
+                            secret,
+                            { expiresIn: '24h' }
+                        );
+                        // return the JWT token for the future API calls
+                        res.statusCode = 200;
+                        res.json({
+                            success: true,
+                            response: 'Authentication successful!',
+                            token: token
+                        });
+                    } else {
+                        res.statusCode = 401;
+                        return next('User is not authorised');
+                    }
                 } else {
                     res.statusCode = 401;
-                    err = 'Incorrect username or password';
-                    return next(err);
+                    return next('Incorrect username or password');
                 }
             });
         } else {
@@ -78,8 +93,19 @@ Allows a user to register a username and password into the system.
     response: { String }
 }
 */
-router.post('/register', async(req, res, next) => {
+router.post('/register', [ 
+  check('username').exists().escape().isEmail(),
+  check('password').exists().escape()
+  ], async(req, res, next) => {
     try {
+
+        // Check for validation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            res.statusCode = 400;
+            return next('Registration failed! Please check the request');
+        }
+
         if (req.body.username && req.body.password) {
             bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
                 db.registerUser(req.body.username, hash);
