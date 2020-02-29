@@ -13,8 +13,7 @@ describe('GET / SUCCESS', function() {
     before(function(done) {
         request(app)
             .post('/login')
-            // TODO: need to properly implement knex to create more valid test data!
-            .send({ username: "admin", password: "password" })
+            .send({ username: 'testuser@email.com', password: 'password' })
             .end(function(err, res) {
                 token = res.body.token; // Or something
                 done();
@@ -69,7 +68,7 @@ describe('POST /login SUCCESS', function() {
         request(app)
             .post('/login')
             // TODO: need to properly implement knex to create more valid test data!
-            .send({ username: "admin", password: "password" })
+            .send({ username: "testuser@email.com", password: "password" })
             .end(function(err, res) {
                 expect(res).to.exist;
                 expect(res.statusCode).to.equal(200);

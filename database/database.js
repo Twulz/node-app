@@ -44,12 +44,23 @@ class Database {
     }
 
     /**
-    Creates database schema - TODO: enables insert of sample data for development
+    Creates database schema
     @returns { Promise } of 'Success' | Error
     @example 'Success' | Error
     */
     initDatabase() {
+    return this.createSchema()
+        .then(() => 'Success')
+    }
+
+    /**
+    Creates database schema - enables insert of sample data for development
+    @returns { Promise } of 'Success' | Error
+    @example 'Success' | Error
+    */
+    initDatabase(data) {
         return this.createSchema()
+            .then(() => this.knex.insert(data.authentication).into('authentication'))
             .then(() => 'Success')
     }
 
@@ -78,7 +89,12 @@ class Database {
             .from('authentication')
             .where('username', username)
             .first()
-            .then((result) => {return result.password})
+            .then((result) => {
+                if (result) {
+                    return result.password;
+                } else { 
+                    return null; 
+                }});
     }
 
     /**
@@ -92,7 +108,12 @@ class Database {
             .from('authentication')
             .where('username', username)
             .first()
-            .then((result) => {return result.app_access})
+            .then((result) => {
+                if (result) {
+                    return result.app_access;
+                } else {
+                    return null;
+                }});
     }
     
 }

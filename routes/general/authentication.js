@@ -47,6 +47,11 @@ router.post('/login', [
         if (req.body.username && req.body.password) {
             var dbhash = await db.getHashedPassword(req.body.username);
             bcrypt.compare(req.body.password, dbhash, async function(err, result) {
+                if (err) {
+                    res.statusCode = 400;
+                    res.error = err;
+                    return next('Authentication failed! Please check the request');
+                }
                 if (result) {
                     var app_access = await db.getUserAuthData(req.body.username);
                     if (app_access) {
