@@ -65,6 +65,18 @@ class Database {
     }
 
     /**
+    Deletes the given user from the database
+    @param { string } username: The username (email address) of the user
+    @returns { Promise } of 'Success' | Error
+     */
+    deleteUser(username) {
+        return this.knex('authentication')
+            .where({ 'username': username })
+            .del()
+            .then(() => 'Success')
+    }
+
+    /**
     Registers a new user with the given username and password
     @param { string } username: The username (email address) of the user
     @param { CHAR(60) } password: A salted hash generated from the user's inputted password

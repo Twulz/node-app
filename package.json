@@ -5,6 +5,7 @@
     "private": true,
     "scripts": {
         "initDB": "node ./database/init.js",
+        "cleanTest": "node ./database/cleanTest.js",
         "initTestDB": "node ./database/initTest.js",
         "test": "mocha --recursive --timeout 100000 --exit",
         "dev-server": "./node_modules/.bin/node-dev ./index.js"
