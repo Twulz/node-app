@@ -48,7 +48,7 @@ class Database {
     @returns { Promise } of 'Success' | Error
     @example 'Success' | Error
     */
-    initDatabase() {
+    initEmptyDatabase() {
     return this.createSchema()
         .then(() => 'Success')
     }
