@@ -53,10 +53,10 @@ router.post('/login', [
                     return next('Authentication failed! Please check the request');
                 }
                 if (result) {
-                    var app_access = await db.getUserAuthData(req.body.username);
-                    if (app_access) {
+                    let userData = await db.getUserAuthData(req.body.username);
+                    if (userData.app_access) {
                         let token = jwt.sign(
-                            {username: req.body.username},
+                            { user_id: userData.user_id },
                             secret,
                             { expiresIn: '24h' }
                         );

@@ -3,6 +3,7 @@ const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
 const expressSanitizer = require('express-sanitizer');
+const cors = require('cors');
 
 let app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -10,23 +11,26 @@ app.use(bodyParser.json());
 app.use(expressSanitizer());
 app.use(logger('dev'));
 
+app.use(cors());
+
 app.use(require('./routes/general/authentication.js'));
 app.use(require('./handlers/authHandler.js'));
 app.use(require('./routes/general/generalRoute.js'));
+app.use(require('./routes/budget/budget.js'));
 
 // General error handler, needs to be defined AFTER all other routes
 app.use(function (err, req, res, next) {
     // If status code hasn't changed, default to 500 server error
     if (res.statusCode === 200) {
         res.statusCode = 500;
-        console.error(err);
-	}
+    }
+    console.error(err);
 	// Return an error code
     res.json({
         success: false,
         status: res.statusCode,
         error: new String(err),
-    })
+    });
 });
 
 // Start the server
