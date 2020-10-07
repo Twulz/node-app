@@ -1,7 +1,7 @@
 const Ajv = require('ajv');
 const express = require('express');
 const router = express.Router();
-const Database = require('../../database/database');
+const db = require('../../database/database');
 
 // JSON Schemas
 const transactionSchema = require('./schemas/transaction.json');
@@ -11,7 +11,6 @@ require('dotenv').config({path: './.env'});
 const logging = true;
 const dbURL = process.env['DB_URL'];
 
-const db = new Database(dbURL);
 const ajv = Ajv({allErrors: true});
 
 /**

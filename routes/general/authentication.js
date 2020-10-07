@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const Database = require('../../database/database');
+const db = require('../../database/database');
 const { check, validationResult } = require('express-validator');
 
 require('dotenv').config({path: './.env'});
@@ -12,7 +12,6 @@ const secret = process.env['SECRET'];
 const logging = process.env['LOGGING'];
 const dbURL = process.env['DB_URL'];
 
-const db = new Database(dbURL);
 const saltRounds = 10;
 
 /**

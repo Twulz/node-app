@@ -8,7 +8,8 @@
         "cleanTest": "node ./database/cleanTest.js",
         "initTestDB": "node ./database/initTest.js",
         "test": "mocha --recursive --timeout 100000 --exit",
-        "dev-server": "./node_modules/.bin/node-dev ./index.js"
+        "dev-server": "./node_modules/.bin/node-dev ./index.js",
+        "initSensorDB": "node ./database/initSensors.js"
     },
     "dependencies": {
         "ajv": "^6.12.2",
@@ -19,7 +20,6 @@
         "express-sanitizer": "^1.0.5",
         "express-validator": "^6.4.0",
         "jsonwebtoken": "^8.5.1",
-        "knex": "^0.20.10",
         "morgan": "^1.9.1",
         "mysql": "^2.18.1",
         "npm": "^6.14.8"

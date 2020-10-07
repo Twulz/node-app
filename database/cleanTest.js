@@ -1,16 +1,8 @@
-const Database = require('./database');
-require('dotenv').config({path: './.env'});
-const dbURL = process.env['DB_URL'];
+const db = require('./database.js');
 
-const db = new Database(dbURL);
-
-/**
- * To remove the test authentication user after testing
- * @returns { Promise } of string | Error
- */
-const cleanup = async () => {
-  await db.deleteUser('testuser@email.com');
-  process.exit();
-}
-
-cleanup();
+db.deleteUser('testuser@email.com')
+  .then((result) => {
+    console.log(result);
+    process.exit();
+  })
+  .catch((error) => new Error(error));

@@ -1,131 +1,136 @@
-const knex = require('knex');
+const { query } = require('express');
+let mysql = require('mysql');
+require('dotenv').config({path: './.env'});
+const dbURL = process.env['DB_URL'];
+let pool = mysql.createPool(dbURL);
 
-const formatDate = (d) => moment(d).format('YYYY-MM-DD');
+/* Converts the mysql pool query function into a Promise function */
+function runQuery(query) {
 
-class Database {
-
-    /**
-     * Constructor of Database Object
-     * @param { Object } config: Knex database configuration 
-     */
-    constructor(config) {
-      this.knex = knex({
-        client: 'mysql',
-        connection: config
-      })
-    }
-
-    /**
-     * Creates all tables required for the Node-App
-     * @returns { Promise } of string | Error
-     * @example 'Success' | Error
-     */
-    createSchema() {
-        return this.knex.schema
-            .dropTableIfExists('budget')
-            .dropTableIfExists('transaction')
-            .dropTableIfExists('category')
-            .dropTableIfExists('account')
-            .dropTableIfExists('user')
-            .createTable('user', tb => {
-                tb.increments('user_id').primary()
-                tb.string('username').notNullable().unique()
-                tb.specificType('password', 'CHAR(60)').notNullable()
-                tb.boolean('app_access').notNullable().defaultTo('false')
-            })
-            .createTable('account', tb => {
-                tb.increments('account_id').primary()
-                tb.string('account_name').notNullable()
-                tb.boolean('active').notNullable().defaultTo('true')
-                tb.integer('user_id').unsigned().notNullable()
-                tb.foreign('user_id').references('user.user_id')
-            })
-            .createTable('category', tb => {
-                tb.increments('category_id').primary()
-                tb.string('category_name').notNullable()
-                tb.integer('user_id').unsigned().notNullable()
-                tb.foreign('user_id').references('user.user_id')
-            })
-            .createTable('transaction', tb => {
-                tb.increments('transaction_id').primary()
-                tb.date('date').notNullable()
-                tb.string('notes')
-                tb.decimal('amount',14,2).notNullable()
-                tb.boolean('cleared').notNullable().defaultTo('false')
-                tb.integer('user_id').unsigned().notNullable()
-                tb.integer('payee_id').unsigned()
-                tb.integer('category_id').unsigned().notNullable()
-                tb.integer('account_id').unsigned().notNullable()
-                tb.foreign('user_id').references('user.user_id')
-                tb.foreign('payee_id').references('account.account_id')
-                tb.foreign('category_id').references('category.category_id')
-                tb.foreign('account_id').references('account.account_id')
-            })
-            .createTable('budget', tb => {
-                tb.increments('budget_id').primary()
-                tb.decimal('amount',14,2).notNullable().defaultTo(0)
-                tb.date('date').notNullable()
-                tb.integer('category_id').unsigned().notNullable()
-                tb.foreign('category_id').references('category.category_id')
-            })
-            .then(() => 'Success')
-            .catch((error) => { return new Error(error); });
-    }
-
-    /**
-     * Destroys all tables used in the Node-App
-     * @returns { Promise } of 'Success' | Error
-     * @example 'Success' | Error
-     */
-    destroySchema() {
-        return this.knex.schema
-            .dropTableIfExists('budget')
-            .dropTableIfExists('transaction')
-            .dropTableIfExists('category')
-            .dropTableIfExists('account')
-            .dropTableIfExists('user')
-            .then(() => 'Success')
-            .catch((error) => { return new Error(error); });
-    }
-
-    /**
-     * Creates database schema
-     * @returns { Promise } of 'Success' | Error
-     * @example 'Success' | Error
-     */
-    initEmptyDatabase() {
-    return this.createSchema()
-        .then(() => 'Success')
-        .catch((error) => { 
-            console.error(error);
-            throw new Error(error); 
+    return new Promise(function (resolve, reject) {
+        pool.getConnection((error, connection) => {
+            if (error) reject(error);
+            connection.query(query, (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+            });
         });
+    });
+    
+}
+
+function runQueryValues(query, values) {
+    return new Promise(function (resolve, reject) {
+        pool.getConnection((error, connection) => {
+            if (error) reject(error);
+            let sql = connection.query(query, [values], (error, result) => {
+                console.log(sql.query);
+                if (error) reject(error);
+                else resolve(result);
+            })
+        })
+    })
+}
+
+/* converts an array of JSON user data into values that can be inserted */
+function sensorType_JSONtoValueString(data) {
+    
+    let values = '';
+
+    for (let i=0; i< data.length; i++) {
+        if (i!=0) values += ",";
+        values += "(\"";
+        values += data[i].name + "\"";
+        values += ")";
+    }
+    return values;
+
+}
+
+/* converts an array of JSON user data into values that can be inserted */
+function sensor_JSONtoValueString(data) {
+    
+    let values = '';
+
+    for (let i=0; i< data.length; i++) {
+        if (i!=0) values += ",";
+        values += "(\"";
+        values += data[i].name + "\",";
+        values += data[i].sensor_type_id;
+        values += ")";
     }
 
-    /**
-     * Creates database schema - enables insert of sample data for development
-     * @returns { Promise } of 'Success' | Error
-     * @example 'Success' | Error
-     */
-    initDatabase(data) {
-        return this.createSchema()
-            .then(() => this.knex.insert(data.user).into('user'))
-            .then(() => 'Success')
-            .catch((error) => { return new Error(error); });
+    return values;
+
+}
+
+/* converts an array of JSON user data into values that can be inserted */
+function user_JSONtoValueString(data) {
+    
+    let values = '';
+
+    for (let i=0; i< data.length; i++) {
+        if (i!=0) values += ",";
+        values += "(\"";
+        values += data[i].username + "\",\"";
+        values += data[i].password + "\"";
+        if (data[i].app_access) values += "," + data[i].app_access
+        values += ")";
     }
 
-    /**
-     * Deletes the given user from the database
-     * @param { string } username: The username (email address) of the user
+    return values;
+
+}
+
+module.exports = {
+
+    /****************************************************************
+     * AUTH FUNCTIONS
+     */
+
+    /** 
+     * Creates the user table in the database
+     * @param { object } data: JSON data to insert into the database
      * @returns { Promise } of 'Success' | Error
      */
-    deleteUser(username) {
-        return this.knex('user')
-            .where({ 'username': username })
-            .del()
-            .then(() => 'Success')
-            .catch((error) => { return new Error(error); });
-    }
+    destroyUserDatabase: () => {
+
+        let q_dropTableUser = `DROP TABLE IF EXISTS user;`;
+
+        return runQuery(q_dropTableUser)
+            .then(() => '---destroyUserDatabase Drop Success')
+            .catch((error) => new Error(error));
+
+    },
+
+    /** 
+     * Creates the user table in the database
+     * @param { object } data: JSON data to insert into the database
+     * @returns { Promise } of 'Success' | Error
+     */
+    initUserDatabase: (data) => {
+
+        let q_createTableUser = `
+        CREATE TABLE user (
+            id INT NOT NULL AUTO_INCREMENT,
+            username VARCHAR(255) NOT NULL UNIQUE,
+            password VARCHAR(60) NOT NULL,
+            app_access BOOLEAN NOT NULL DEFAULT 0,
+            PRIMARY KEY (id)
+        );`;
+        let q_insertUser_full = '';
+        if (data && data.user) q_insertUser_full = `INSERT INTO user (username, password, app_access) VALUES ` + user_JSONtoValueString(data.user);
+
+        return runQuery(q_createTableUser)
+            .then((result) => {
+                console.log('---initUserDatabase Create Success');
+                // Insert given data
+                if (data && data.user) return runQuery(q_insertUser_full);
+            })
+            .then(() => '---initUserDatabase Insert Success')
+            .catch((error) => new Error(error));
+
+    },
 
     /**
      * Registers a new user with the given username and password
@@ -133,54 +138,144 @@ class Database {
      * @param { CHAR(60) } password: A salted hash generated from the user's inputted password
      * @returns { Promise } of 'Success' | Error
      */
-    registerUser(username, password) {
-        return this.knex('user')
-            .insert({ 
-                'username': username,
-                'password': password })
-            .then(() => 'Success')
-            .catch((error) => { return new Error(error); });
-    }
+    registerUser: (username, password) => {
+
+        let q_insertUser = `INSERT INTO user (username, password) VALUES ("` + username + `","` + password `");`;
+
+        return runQuery(q_insertUser)
+            .then((result) => 'Success')
+            .catch((error) => new Error(error));
+
+    },
+
+    /** 
+     * Deletes the given user from the database
+     * @param { string } username: The username (email address) of the user
+     * @returns { Promise } of 'Success' | Error
+     */
+    deleteUser: (username) => {
+
+        let q_deleteUser = `DELETE FROM user WHERE username = "` + username + `"`;
+
+        return runQuery(q_deleteUser)
+            .then((result) => 'Success')
+            .catch((error) => new Error(error));
+
+    },
 
     /**
      * Gets the salted hash representing the given username's password
      * @param { string } username: The username (email address) of the user
      * @returns { CHAR(60) } password: A salted hash generated from the user's inputted password
      */
-    getHashedPassword(username) {
-        return this.knex
-            .select('password')
-            .from('user')
-            .where('username', username)
-            .first()
+    getHashedPassword: (username) => {
+
+        let query = `SELECT password FROM user WHERE username = "` + username + `"`;
+
+        return runQuery(query)
             .then((result) => {
-                if (result) {
-                    return result.password;
+                if (result[0]) {
+                    return result[0].password;
                 } else { 
                     return null; 
                 }})
-            .catch((error) => { return new Error(error); });
-    }
+            .catch((error) => new Error(error));
+
+    },
 
     /**
      * Returns user details: id and app access
      * @param { string } username: The username (email address) of the user
      * @returns { object } userDetails: { user_id: integer, app_access: boolean }
      */
-    getUserAuthData(username) {
-        return this.knex
-            .select('user_id', 'app_access')
-            .from('user')
-            .where('username', username)
-            .first()
-            .then((userDetails) => {
-                if (userDetails) {
-                    return userDetails;
+    getUserAuthData: (username) => {
+
+        let query = `SELECT id, app_access FROM user WHERE username = "` + username + `"`;
+
+        return runQuery(query)
+            .then((result) => {
+                if (result[0]) {
+                    return result[0];
                 } else {
                     return null;
-                }})
-            .catch((error) => { return new Error(error); });
-    }
+                }
+            })
+            .catch((error) => new Error(error));
+
+    },
+
+    /****************************************************************
+     * BUDGET FUNCTIONS
+     */
+
+    destroyBudgetDatabase: () => {
+
+        let q_dropTableBudget = `DROP TABLE IF EXISTS budget;`;
+        let q_dropTableTransaction = `DROP TABLE IF EXISTS transaction;`;
+        let q_dropTableCategory = `DROP TABLE IF EXISTS category;`;
+        let q_dropTableAccount = `DROP TABLE IF EXISTS account;`;
+
+        return runQuery(q_dropTableBudget + q_dropTableTransaction + q_dropTableCategory + q_dropTableAccount)
+            .then(() => '---destroyBudgetDatabase Drop Success')
+            .catch((error) => new Error(error));
+    },
+
+    initBudgetDatabase: () => {
+
+        let q_createTableAccount = `
+        CREATE TABLE account (
+            id INT NOT NULL AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            active BOOLEAN NOT NULL DEFAULT 1,
+            user_id INT NOT NULL,
+            PRIMARY KEY (id),
+            FOREIGN KEY (user_id) REFERENCES user(id)
+        );`
+        let q_createTableCategory = `
+        CREATE TABLE category (
+            id INT NOT NULL AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            user_id INT NOT NULL,
+            PRIMARY KEY (id),
+            FOREIGN KEY (user_id) REFERENCES user(id)
+        );`
+        let q_createTableTransaction = `
+        CREATE TABLE transaction (
+            id INT NOT NULL AUTO_INCREMENT,
+            date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            notes VARCHAR(255),
+            amount DECIMAL(19,2) NOT NULL,
+            cleared BOOLEAN NOT NULL DEFAULT 0,
+            user_id INT NOT NULL,
+            payee_id INT NOT NULL,
+            category_id INT NOT NULL,
+            account_id INT NOT NULL,
+            PRIMARY KEY (id),
+            FOREIGN KEY (user_id) REFERENCES user(id),
+            FOREIGN KEY (payee_id) REFERENCES account(id),
+            FOREIGN KEY (category_id) REFERENCES category(id),
+            FOREIGN KEY (account_id) REFERENCES account(id)
+        );`
+        let q_createTableBudget = `
+        CREATE TABLE budget (
+            id INT NOT NULL AUTO_INCREMENT,
+            amount DECIMAL(19,2) NOT NULL DEFAULT 0,
+            date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            category_id INT NOT NULL,
+            PRIMARY KEY (id),
+            FOREIGN KEY (category_id) REFERENCES category(id)
+        );`
+        let createQuery = 
+            q_createTableAccount +
+            q_createTableCategory + 
+            q_createTableTransaction +
+            q_createTableBudget;
+
+        return runQuery(createQuery)
+            .then(() => '---initBudgetDatabase Create Success')
+            .catch((error) => new Error(error));
+
+    },
 
     /**
      * Creates an account for the given user 
@@ -188,14 +283,15 @@ class Database {
      * @param { number } user_id: The user id of the user creating the account
      * @returns { Promise } of 'Success' | Error
      */
-    createAccount(account_name, user_id) {
-        return this.knex('account')
-            .insert({ 
-                'account_name': account_name,
-                'user_id': user_id })
+    createAccount: (account_name, user_id) => {
+
+        let q_insertAccount = `INSERT INTO account (name, user_id) VALUES ("` + account_name + `",` + user_id + `);`;
+
+        return runQuery(q_insertAccount)
             .then(() => 'Success')
-            .catch((error) => { return new Error(error); });
-    }
+            .catch((error) => new Error(error));
+
+    },
 
     /**
      * Updates the given account with the given name and/or status
@@ -205,15 +301,14 @@ class Database {
      * @returns { Promise } of 'Success' | Error
      */
     updateAccount(account_id, account_name, active) {
-        return this.knex('account')
-            .update({
-                'account_name': account_name,
-                'active': active
-            })
-            .where('account_id', account_id)
+
+        let q_updateAccount = `UPDATE account SET name = "` + account_name + `", active = ` + active ` WHERE id = ` + account_id + `;`;
+
+        return runQuery(q_updateAccount)
             .then(() => 'Success')
-            .catch((error) => { return new Error(error); });
-    }
+            .catch((error) => new Error(error));
+
+    },
 
     /**
      * Creates a category for the given user
@@ -221,15 +316,15 @@ class Database {
      * @param { number } user_id 
      * @returns { Promise } of 'Success' | Error
      */
-    createCategory(category_name, user_id) {
-        return this.knex('category')
-            .insert({ 
-                'category_name': category_name,
-                'user_id': user_id 
-            })
+    createCategory: (category_name, user_id) => {
+
+        let q_insertCategory = `INSERT INTO category SET name = "` + category_name + `" WHERE id = ` + user_id + `;`;
+
+        return runQuery(q_insertCategory)
             .then(() => 'Success')
-            .catch((error) => { return new Error(error); });
-    }
+            .catch((error) => new Error(error));
+
+    },
 
     /**
      * Update the given category to the given name
@@ -237,15 +332,15 @@ class Database {
      * @param { string } category_name 
      * @returns { Promise } of 'Success' | Error
      */
-    updateCategory(category_id, category_name) {
-        return this.knex('category')
-            .update({
-                'category_name': category_name
-            })
-            .where('category_id', category_id)
+    updateCategory: (category_id, category_name) => {
+
+        let q_updateCategory = `UPDATE category SET name = "` + category_name + `" WHERE id = ` + category_id + `;`;
+
+        return runQuery(q_updateCategory)
             .then(() => 'Success')
-            .catch((error) => { return new Error(error); });
-    }
+            .catch((error) => new Error(error));
+
+    },
 
     /**
      * Create a transaction with the given parameters
@@ -253,22 +348,23 @@ class Database {
      * @param { number } user_id
      * @returns { Promise } of 'Success' | Error
      */
-    createTransaction(transaction, user_id) {
-        if (transaction.date == null) 
-        return this.knex('transaction')
-            .insert({
-                'user_id': user_id,
-                'account_id': transaction.account_id,
-                'category_id': transaction.category_id,
-                'payee_id': transaction.payee_id,
-                'date': transaction.date,
-                'amount': transaction.amount,
-                'cleared': transaction.cleared,
-                'notes': transaction.notes
-            })
+    createTransaction: (transaction, user_id) => {
+
+        let q_insertTransaction = `INSERT INTO transaction (user_id, account_id, category_id, payee_id, date, amount, cleared, notes) VALUES (` +
+            transaction.user_id + `,` +
+            transaction.account_id + `,` +
+            transaction.category_id + `,` +
+            transaction.payee_id + `,` +
+            transaction.date + `,` +
+            transaction.amount + `,` +
+            transaction.cleared + `,"` +
+            transaction.notes + `");`;
+    
+        return runQuery(q_insertTransaction)
             .then(() => 'Success')
-            .catch((error) => { return new Error(error); });
-    }
+            .catch((error) => new Error(error));
+
+    },
 
     /**
      * Update a transaction with the given parameters
@@ -282,20 +378,15 @@ class Database {
      * @param { string } notes 
      */
     updateTransaction(transaction_id, account_id, category_id, payee_id, date, amount, cleared, notes) {
-        return this.knex('transaction')
-            .update({
-                'account_id': account_id,
-                'category_id': category_id,
-                'payee_id': payee_id,
-                'date': date,
-                'amount': amount,
-                'cleared': cleared,
-                'notes': notes
-            })
-            .where('transaction_id', transaction_id)
+
+        let q_updateTransaction = `UPDATE transaction LET account_id=` + account_id + `,category_id=` + category_id + `,payee_id=` + payee_id + `,date=` + date
+            + `,amount=` + amount + `,cleared=` + cleared + `,notes="` + notes + `" WHERE id=` + transaction_id + `;`;
+
+        return runQuery(q_updateTransaction)
             .then(() => 'Success')
-            .catch((error) => { return new Error(error); });
-    }
+            .catch((error) => new Error(error));
+
+    },
 
     /**
      * Insert a month's budget amount for the given category.
@@ -303,16 +394,15 @@ class Database {
      * @param { decimal } amount 
      * @param { date } date 
      */
-    insertBudgetMonth(category_id, amount, date) {
-        return this.knex('budget')
-            .insert({
-                'category_id': category_id,
-                'amount': amount,
-                'date': date
-            })
+    insertBudgetMonth: (category_id, amount, date) => {
+
+        let q_insertBudgetMonth = `INSERT INTO budget (category_id, amount, date) VALUES (` + category_id + `,` + amount + `,` + date + `);`;
+
+        return runQuery(q_insertBudgetMonth)
             .then(() => 'Success')
-            .catch((error) => { return new Error(error); });
-    }
+            .catch((error) => new Error(error));
+
+    },
 
     /**
      * Update a month's budget amount for the given category
@@ -321,24 +411,23 @@ class Database {
      * @param { decimal } amount 
      * @param { date } date 
      */
-    updateBudgetMonth(budget_id, category_id, amount, date) {
-        return this.knex('budget')
-            .update({
-                'category_id': category_id,
-                'amonut': amount,
-                'date': date
-            })
-            .where('budget_id', budget_id)
+    updateBudgetMonth: (budget_id, category_id, amount, date) => {
+
+        let q_updateBudgetMonth = `UPDATE budget SET category_id=` + category_id + `,amount=` + amount + `,date=` + date + ` WHERE id=` + budget_id;
+
+        return runQuery(q_updateBudgetMonth)
             .then(() => 'Success')
-            .catch((error) => { return new Error(error); });
-    }
+            .catch((error) => new Error(error));
+        
+    },
 
     /**
      * Get all the transactions for a given user
      * @param { number } user_id 
      */
-    getAllTransactions(user_id) {
-        let result = this.knex('transaction')
+    getAllTransactions: (user_id) => {
+
+        /* let result = this.knex('transaction')
             .select(
                 'transaction.date', 
                 'transaction.amount', 
@@ -356,9 +445,105 @@ class Database {
             .innerJoin('account as fromaccount', 'transaction.account_id', 'fromaccount.account_id')
             .leftJoin('account as payee', 'transaction.payee_id', 'payee.account_id')
             .catch((error) => { return new Error(error); });
-        return result;
-    }
-    
-}
+        return result; */
+    },
 
-module.exports = Database;
+    /****************************************************************
+     * SENSOR FUNCTIONS
+     */
+
+    destroySensorDatabase: () => {
+
+        let q_dropTableSensorData = 'DROP TABLE IF EXISTS sensor_data;';
+        let q_dropTableSensor = 'DROP TABLE IF EXISTS sensor;';
+        let q_dropTableSensorType = 'DROP TABLE IF EXISTS sensor_type;';
+
+        return runQuery(q_dropTableSensorData + q_dropTableSensor + q_dropTableSensorType)
+            .then(() => '---destroySensorDatabase Drop Success')
+            .catch((error) => new Error(error));
+
+    },
+
+    initSensorDatabase: (data) => {
+
+        let q_createSensorTypeTable = `
+            CREATE TABLE sensor_type (
+                id INT NOT NULL AUTO_INCREMENT,
+                name VARCHAR(255) NOT NULL,
+                PRIMARY KEY (id)
+            );`;
+        let q_createSensorTable = `
+            CREATE TABLE sensor (
+                id INT NOT NULL AUTO_INCREMENT,
+                name VARCHAR(255) NOT NULL,
+                sensor_type_id INT NOT NULL,
+                PRIMARY KEY (id),
+                FOREIGN KEY (sensor_type_id) REFERENCES sensor_type(id)
+            );`;
+        let q_createSensorDataTable = `
+            CREATE TABLE sensor_data (
+                id INT NOT NULL AUTO_INCREMENT,
+                created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                sensor_id INT NOT NULL,
+                value INT NOT NULL,
+                PRIMARY KEY (id),
+                FOREIGN KEY (sensor_id) REFERENCES sensor(id)
+            );`;
+
+        let q_insertSensorType = `INSERT INTO sensor_type (name) VALUES `;
+        let q_insertSensor = `INSERT INTO sensor (name, sensor_type_id) VALUES `;
+
+        let insertSensorTypeQuery = '';
+        let insertSensorQuery = '';
+
+        if (data && data.sensor_type) insertSensorTypeQuery = q_insertSensorType + sensorType_JSONtoValueString(data.sensor_type);
+        if (data && data.sensor) insertSensorQuery = q_insertSensor + sensor_JSONtoValueString(data.sensor);
+        
+        return runQuery(q_createSensorTypeTable + q_createSensorTable + q_createSensorDataTable)
+            .then((result) => {
+                console.log('---initSensorDatabase Create Success');
+                if (data && data.sensor_type) return runQuery(insertSensorTypeQuery);
+            })
+            .then((result) => {
+                console.log('---initSensorDatabase Insert Sensor Type Success');
+                if (data && data.sensor) return runQuery(insertSensorQuery);
+            })
+            .then((result) => {
+                console.log('---initSensorDatabase Insert Sensor Success');
+            })
+            .then(() => 'Success')
+            .catch((error) => new Error(error));
+
+    },
+
+    insertSensorType: (name) => {
+
+        let query = `INSERT INTO sensor_type (name) VALUES('` + name + `');`;
+
+        return runQuery(query)
+            .then(() => 'Success')
+            .catch((error) => new Error(error));
+
+    },
+
+    insertSensor: (name, sensor_type_id) => {
+
+        let query = `INSERT INTO sensor (name, sensor_type_id) VALUES('` + name + `', ` + sensor_type_id + `);`;
+
+        return runQuery(query)
+            .then(() => 'Success')
+            .catch((error) => new Error(error));
+
+    },
+
+    insertSensorData: (sensor_id, value) => {
+
+        let query = `INSERT INTO sensor_data (sensor_id, value) VALUES (` + sensor_id + ',' + value + ');';
+
+        return runQuery(query)
+            .then(() => 'Success')
+            .catch((error) => new Error(error));
+
+    }
+
+}

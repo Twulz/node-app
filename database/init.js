@@ -1,17 +1,32 @@
-const Database = require('./database');
-//const sample = require('./sample');
-require('dotenv').config({path: './.env'});
-const dbURL = process.env['DB_URL'];
+const db = require('./database.js');
+const initData = require('./initData');
 
-const db = new Database(dbURL);
-
-/**
-Initialises the database with all of the tables required for the node-app
-@returns { Promise } of string | Error
-*/
-const initialise = async () => {
-  await db.initEmptyDatabase();
-  process.exit();
-}
-
-initialise();
+db.destroySensorDatabase()
+  .then((result) => {
+    console.log(result);
+    return db.destroyBudgetDatabase();
+  })
+  .then((result) => {
+    console.log(result);
+    return db.destroyUserDatabase();
+  })
+  .then ((result) => {
+    console.log(result);
+    return db.initUserDatabase();
+  })
+  .then((result) => {
+    console.log(result);
+    return db.initBudgetDatabase();
+  })
+  .then((result) => {
+    console.log(result);
+    return db.initSensorDatabase(initData);
+  })
+  .then((result) => {
+    console.log(result);
+    process.exit();
+  })
+  .catch((error) => {
+    console.log(error);
+    process.exit();
+  });

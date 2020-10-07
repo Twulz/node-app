@@ -6,7 +6,7 @@ const chaiHttp = require('chai-http');
 const { expect } = chai;
 chai.use(chaiHttp);
 
-describe('GET /budget/transactions/ SUCCESS', function() {
+/* describe('GET /budget/transactions/ SUCCESS', function() {
 
     var token = null;
 
@@ -33,7 +33,7 @@ describe('GET /budget/transactions/ SUCCESS', function() {
                 done();
             })
     });
-});
+}); */
 
 /* describe('GET / FAILURE: missing Token', function() {
     it('Respond with 400: check the request', function(done) {
