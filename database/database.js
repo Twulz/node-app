@@ -140,7 +140,7 @@ module.exports = {
      */
     registerUser: (username, password) => {
 
-        let q_insertUser = `INSERT INTO user (username, password) VALUES ("` + username + `","` + password `");`;
+        let q_insertUser = `INSERT INTO user (username, password) VALUES ("` + username + `","` + password + `");`;
 
         return runQuery(q_insertUser)
             .then((result) => 'Success')
