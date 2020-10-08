@@ -6,3 +6,5 @@ db.deleteUser('testuser@email.com')
     process.exit();
   })
   .catch((error) => new Error(error));
+
+// TODO: add delete the sensor test data.

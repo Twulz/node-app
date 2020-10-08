@@ -44,7 +44,8 @@ router.post('/login', [
         res.setHeader('content-type', 'application/json');
 
         if (req.body.username && req.body.password) {
-            var dbhash = await db.getHashedPassword(req.body.username);
+            let dbhash = await db.getHashedPassword(req.body.username);
+            console.log(dbhash);
             bcrypt.compare(req.body.password, dbhash, async function(err, result) {
                 if (err) {
                     res.statusCode = 400;
@@ -52,13 +53,16 @@ router.post('/login', [
                     return next('Authentication failed! Please check the request');
                 }
                 if (result) {
+                    console.log(result);
                     let userData = await db.getUserAuthData(req.body.username);
+                    console.log(userData);
                     if (userData.app_access) {
                         let token = jwt.sign(
                             { user_id: userData.user_id },
                             secret,
                             { expiresIn: '24h' }
                         );
+                        console.log(token);
                         // return the JWT token for the future API calls
                         res.statusCode = 200;
                         res.json({
