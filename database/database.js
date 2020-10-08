@@ -197,7 +197,7 @@ module.exports = {
                 if (result[0]) {
                     return result[0];
                 } else {
-                    return null;
+                    throw new Error('User not found');
                 }
             })
             .catch((error) => new Error(error));
