@@ -1,13 +1,12 @@
 require('dotenv').config({path: './.env'});
 const express = require('express');
 const logger = require('morgan');
-const bodyParser = require('body-parser');
 const expressSanitizer = require('express-sanitizer');
 const cors = require('cors');
 
 let app = express();
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(expressSanitizer());
 app.use(logger('dev'));
 
@@ -37,8 +36,9 @@ app.use(function (err, req, res, next) {
 
 // Start the server
 if(!module.parent){
-    var server = app.listen(process.env.PORT || 3000, 'localhost', function() {
-        console.log('Server started on port 3000...');
+    let port = process.env.PORT != null ? process.env.PORT : 4000;
+    var server = app.listen(port, 'localhost', function() {
+        console.log(`Server started on port ${port}...`);
     });
 }
 
