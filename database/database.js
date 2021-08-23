@@ -12,7 +12,10 @@ function runQuery(query) {
             if (error) reject(error);
             connection.query(query, (error, result) => {
                 if (error) reject(error);
-                else resolve(result);
+                else {
+                    connection.release();
+                    resolve(result);
+                }
             });
         });
     });
