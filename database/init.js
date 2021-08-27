@@ -1,26 +1,18 @@
-const db = require('./database.js');
-const initData = require('./initData');
+/**
+ * Initialises the tables in the database if they don't exist.
+ * Intended for creating new tables on deployment to production (no data insert)
+ */
 
-db.destroySensorDatabase()
-  .then((result) => {
-    console.log(result);
-    return db.destroyBudgetDatabase();
-  })
-  .then((result) => {
-    console.log(result);
-    return db.destroyUserDatabase();
-  })
-  .then ((result) => {
-    console.log(result);
-    return db.initUserDatabase();
-  })
+const db = require('./database.js');
+
+db.initUserDatabase()
   .then((result) => {
     console.log(result);
     return db.initBudgetDatabase();
   })
   .then((result) => {
     console.log(result);
-    return db.initSensorDatabase(initData);
+    return db.initSensorDatabase();
   })
   .then((result) => {
     console.log(result);

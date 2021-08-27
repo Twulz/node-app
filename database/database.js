@@ -85,7 +85,7 @@ function user_JSONtoValueString(data) {
 
 }
 
-module.exports = {
+let db = module.exports = {
 
     /****************************************************************
      * AUTH FUNCTIONS
@@ -114,7 +114,7 @@ module.exports = {
     initUserDatabase: (data) => {
 
         let q_createTableUser = `
-        CREATE TABLE user (
+        CREATE TABLE IF NOT EXISTS user (
             id INT NOT NULL AUTO_INCREMENT,
             username VARCHAR(255) NOT NULL UNIQUE,
             password VARCHAR(60) NOT NULL,
@@ -226,7 +226,7 @@ module.exports = {
     initBudgetDatabase: () => {
 
         let q_createTableAccount = `
-        CREATE TABLE account (
+        CREATE TABLE IF NOT EXISTS account (
             id INT NOT NULL AUTO_INCREMENT,
             name VARCHAR(255) NOT NULL,
             active BOOLEAN NOT NULL DEFAULT 1,
@@ -235,7 +235,7 @@ module.exports = {
             FOREIGN KEY (user_id) REFERENCES user(id)
         );`
         let q_createTableCategory = `
-        CREATE TABLE category (
+        CREATE TABLE IF NOT EXISTS category (
             id INT NOT NULL AUTO_INCREMENT,
             name VARCHAR(255) NOT NULL,
             user_id INT NOT NULL,
@@ -243,7 +243,7 @@ module.exports = {
             FOREIGN KEY (user_id) REFERENCES user(id)
         );`
         let q_createTableTransaction = `
-        CREATE TABLE transaction (
+        CREATE TABLE IF NOT EXISTS transaction (
             id INT NOT NULL AUTO_INCREMENT,
             date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             notes VARCHAR(255),
@@ -260,7 +260,7 @@ module.exports = {
             FOREIGN KEY (account_id) REFERENCES account(id)
         );`
         let q_createTableBudget = `
-        CREATE TABLE budget (
+        CREATE TABLE IF NOT EXISTS budget (
             id INT NOT NULL AUTO_INCREMENT,
             amount DECIMAL(19,2) NOT NULL DEFAULT 0,
             date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -470,13 +470,13 @@ module.exports = {
     initSensorDatabase: (data) => {
 
         let q_createSensorTypeTable = `
-            CREATE TABLE sensor_type (
+            CREATE TABLE IF NOT EXISTS sensor_type (
                 id INT NOT NULL AUTO_INCREMENT,
                 name VARCHAR(255) NOT NULL,
                 PRIMARY KEY (id)
             );`;
         let q_createSensorTable = `
-            CREATE TABLE sensor (
+            CREATE TABLE IF NOT EXISTS sensor (
                 id INT NOT NULL AUTO_INCREMENT,
                 name VARCHAR(255) NOT NULL,
                 sensor_type_id INT NOT NULL,
@@ -484,7 +484,7 @@ module.exports = {
                 FOREIGN KEY (sensor_type_id) REFERENCES sensor_type(id)
             );`;
         let q_createSensorDataTable = `
-            CREATE TABLE sensor_data (
+            CREATE TABLE IF NOT EXISTS sensor_data (
                 id INT NOT NULL AUTO_INCREMENT,
                 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 sensor_id INT NOT NULL,
@@ -547,6 +547,38 @@ module.exports = {
             .then(() => 'Success')
             .catch((error) => new Error(error));
 
+    },
+
+    cleanInit: (data) => {
+        db.destroySensorDatabase()
+            .then((result) => {
+                console.log(result);
+                return db.destroyBudgetDatabase()
+            })
+            .then((result) => {
+                console.log(result);
+                return db.destroyUserDatabase();
+            })
+            .then ((result) => {
+                console.log(result);
+                return db.initUserDatabase(data);
+            })
+            .then((result) => {
+                console.log(result);
+                return db.initBudgetDatabase()
+            })
+            .then((result) => {
+                console.log(result);
+                return db.initSensorDatabase(data);
+            })
+            .then((result) => {
+                console.log(result);
+                process.exit();
+            })
+            .catch((error) => {
+                console.log(error);
+                process.exit(1);
+            });
     }
 
 }
