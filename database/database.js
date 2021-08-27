@@ -1,3 +1,7 @@
+/**
+ * All database functions
+ */
+
 const { query } = require('express');
 let mysql = require('mysql');
 require('dotenv').config({path: './.env'});
