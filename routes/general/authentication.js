@@ -58,7 +58,7 @@ router.post('/login', [
                     console.log(userData);
                     if (userData.app_access) {
                         let token = jwt.sign(
-                            { user_id: userData.user_id },
+                            { user_id: userData.id },
                             secret,
                             { expiresIn: '24h' }
                         );

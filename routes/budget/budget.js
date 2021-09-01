@@ -21,7 +21,7 @@ Hello World
     response: { String }
 }
 */
-router.get('/api/budget/transactions/', async (req, res, next) => {
+router.get('/budget/transactions/', async (req, res, next) => {
     try {
 
         res.setHeader('content-type', 'application/json');
@@ -36,7 +36,7 @@ router.get('/api/budget/transactions/', async (req, res, next) => {
     }
 });
 
-router.post('/api/budget/transaction', async (req, res, next) => {
+router.post('/budget/transaction', async (req, res, next) => {
     try {
         res.setHeader('content-type', 'application/json');
         if (ajv.validate(transactionSchema, req.body.transaction)) {

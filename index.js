@@ -36,7 +36,7 @@ app.use(function (err, req, res, next) {
 
 // Start the server
 if(!module.parent){
-    let port = process.env.PORT != null ? process.env.PORT : 3000;
+    let port = process.env.PORT != null ? process.env.PORT : 4000;
     var server = app.listen(port, 'localhost', function() {
         console.log(`Server started on port ${port}...`);
     });

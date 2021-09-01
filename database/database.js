@@ -254,7 +254,7 @@ let db = module.exports = {
             amount DECIMAL(19,2) NOT NULL,
             cleared BOOLEAN NOT NULL DEFAULT 0,
             user_id INT NOT NULL,
-            payee_id INT NOT NULL,
+            payee_id INT,
             category_id INT NOT NULL,
             account_id INT NOT NULL,
             PRIMARY KEY (id),
@@ -434,25 +434,29 @@ let db = module.exports = {
      */
     getAllTransactions: (user_id) => {
 
-        /* let result = this.knex('transaction')
-            .select(
-                'transaction.date', 
-                'transaction.amount', 
-                'transaction.notes', 
-                'transaction.cleared', 
-                'category.category_id', 
-                'category.category_name', 
-                'transaction.account_id as fromaccount_id', 
-                'fromaccount.account_name as fromaccount_name', 
-                'transaction.payee_id', 
-                'payee.account_name as payee_name' )
-            .from('transaction')
-            .where({ 'transaction.user_id': user_id })
-            .innerJoin('category', 'transaction.category_id', 'category.category_id')
-            .innerJoin('account as fromaccount', 'transaction.account_id', 'fromaccount.account_id')
-            .leftJoin('account as payee', 'transaction.payee_id', 'payee.account_id')
-            .catch((error) => { return new Error(error); });
-        return result; */
+        let q_getTransactions = 
+            `SELECT 
+                date, 
+                amount, 
+                notes, 
+                cleared, 
+                category.name AS category_name, 
+                account.name AS account_name, 
+                payee.name AS payee_name 
+            FROM transaction 
+            INNER JOIN category ON transaction.category_id = category.id 
+            INNER JOIN account ON transaction.account_id = account.id 
+            LEFT JOIN account AS payee ON transaction.payee_id = account.id 
+            WHERE transaction.user_id = ${user_id}`;
+        console.log(user_id);
+        console.log(q_getTransactions);
+
+        return runQuery(q_getTransactions)
+            .then((result) => {
+                console.log(result);
+                return result
+            })
+            .catch((error) => new Error(error));
     },
 
     /****************************************************************
