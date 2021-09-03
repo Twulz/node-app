@@ -1,6 +1,9 @@
 #!/bin/sh
 cd ~/node-app
 git pull
+[ $? -eq 0 ] || exit 1
 npm install -—production
+[ $? -eq 0 ] || exit 1
 (pm2 restart node-app) || (pm2 start index.js --name "node-app")
-exit
+[ $? -eq 0 ] || exit 1
+exit 0
