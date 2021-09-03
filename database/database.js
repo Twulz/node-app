@@ -358,14 +358,14 @@ let db = module.exports = {
     createTransaction: (transaction, user_id) => {
 
         let q_insertTransaction = `INSERT INTO transaction (user_id, account_id, category_id, payee_id, date, amount, cleared, notes) VALUES (` +
-            transaction.user_id + `,` +
+            user_id + `,` +
             transaction.account_id + `,` +
             transaction.category_id + `,` +
             transaction.payee_id + `,` +
-            transaction.date + `,` +
+            `"${transaction.date}",` +
             transaction.amount + `,` +
-            transaction.cleared + `,"` +
-            transaction.notes + `");`;
+            transaction.cleared + `,` +
+            `"${transaction.notes}");`;
     
         return runQuery(q_insertTransaction)
             .then(() => 'Success')
