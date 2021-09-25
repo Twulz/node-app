@@ -10,20 +10,19 @@ let pool = mysql.createPool(dbURL);
 
 /* Converts the mysql pool query function into a Promise function */
 function runQuery(query) {
-
     return new Promise(function (resolve, reject) {
         pool.getConnection((error, connection) => {
             if (error) reject(error);
             connection.query(query, (error, result) => {
-                if (error) reject(error);
-                else {
-                    connection.release();
+                connection.release();
+                if (error) {
+                    reject(error);
+                } else {
                     resolve(result);
                 }
             });
         });
-    });
-    
+    }); 
 }
 
 function runQueryValues(query, values) {
