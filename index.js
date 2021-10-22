@@ -3,11 +3,13 @@ const express = require('express');
 const logger = require('morgan');
 const expressSanitizer = require('express-sanitizer');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 
 let app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(expressSanitizer());
+app.use(cookieParser());
 app.use(logger('dev'));
 
 app.use(cors());

@@ -61,6 +61,6 @@ router.post('/budget/transaction', async (req, res, next) => {
     catch (error) {
         return next(error);
     }
-})
+});
 
 module.exports = router;

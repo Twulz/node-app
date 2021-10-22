@@ -45,7 +45,6 @@ router.post('/login', [
 
         if (req.body.username && req.body.password) {
             let dbhash = await db.getHashedPassword(req.body.username);
-            console.log(dbhash);
             bcrypt.compare(req.body.password, dbhash, async function(err, result) {
                 if (err) {
                     res.statusCode = 400;
@@ -53,22 +52,25 @@ router.post('/login', [
                     return next('Authentication failed! Please check the request');
                 }
                 if (result) {
-                    console.log(result);
                     let userData = await db.getUserAuthData(req.body.username);
-                    console.log(userData);
                     if (userData.app_access) {
                         let token = jwt.sign(
                             { user_id: userData.id },
                             secret,
                             { expiresIn: '24h' }
                         );
-                        console.log(token);
                         // return the JWT token for the future API calls
+                        let isDev = process.env.NODE_ENV !== "development";
+                        res.cookie("token", JSON.stringify(token), {
+                            secure: process.env.NODE_ENV !== "development",
+                            httpOnly: true,
+                            withCredentials: true,
+                            expires: Date.now() + 1
+                          });
                         res.statusCode = 200;
                         res.json({
                             success: true,
-                            response: 'Authentication successful!',
-                            token: token
+                            response: 'Authentication successful!'
                         });
                     } else {
                         res.statusCode = 401;
