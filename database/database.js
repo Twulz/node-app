@@ -14,7 +14,7 @@ function runQuery(query) {
         pool.getConnection((error, connection) => {
             if (error) reject(error);
             connection.query(query, (error, result) => {
-                connection.release();
+                pool.releaseConnection(connection);
                 if (error) {
                     reject(error);
                 } else {

@@ -60,12 +60,11 @@ router.post('/login', [
                             { expiresIn: '24h' }
                         );
                         // return the JWT token for the future API calls
-                        let isDev = process.env.NODE_ENV !== "development";
                         res.cookie("token", JSON.stringify(token), {
-                            secure: process.env.NODE_ENV !== "development",
+                            secure: process.env.NODE_ENV !== "development", // https unavailable on localhost
                             httpOnly: true,
                             withCredentials: true,
-                            expires: Date.now() + 1
+                            maxAge: 8 * 60 * 60 * 1000  // 8 hours
                           });
                         res.statusCode = 200;
                         res.json({
@@ -83,7 +82,7 @@ router.post('/login', [
             });
         } else {
             res.statusCode = 400;
-            return next('Authentication failed! Please check the request');
+            return next('3 Authentication failed! Please check the request');
         }
     } catch (err) {
         return next(err);

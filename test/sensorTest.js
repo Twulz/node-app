@@ -6,9 +6,9 @@ const chaiHttp = require('chai-http');
 const { expect } = chai;
 chai.use(chaiHttp);
 
-describe('POST /smartHome/sensor/:id SUCCESS', function() {
+describe('SensorTest: POST /smartHome/sensor/:id SUCCESS', function() {
 
-    var token = null;
+    let token = null;
     let sensorId = 1;
     let value = 500;
 
@@ -17,7 +17,10 @@ describe('POST /smartHome/sensor/:id SUCCESS', function() {
             .post('/login')
             .send({ username: 'testuser@email.com', password: 'password' })
             .end(function(err, res) {
-                token = res.body.token; // Or something
+                token = res.header['set-cookie'][0];
+                if (token != null) {
+                    token = token.slice(9, 153);
+                }
                 done();
             });
       });
@@ -26,7 +29,7 @@ describe('POST /smartHome/sensor/:id SUCCESS', function() {
         request(app)
             .post('/smartHome/sensor/' + sensorId)
             .query({value: value})
-            .set("Authorization", "Bearer " + token) 
+            .set('Cookie', 'token='+token)
             .set({'Accept': 'application/json'})
             .end(function(err, res) {
                 expect(res).to.exist;
