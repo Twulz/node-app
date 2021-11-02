@@ -82,7 +82,7 @@ router.post('/login', [
             });
         } else {
             res.statusCode = 400;
-            return next('3 Authentication failed! Please check the request');
+            return next('Authentication failed! Please check the request');
         }
     } catch (err) {
         return next(err);

@@ -20,6 +20,16 @@ app.use(require('./routes/general/generalRoute.js'));
 app.use(require('./routes/smartHome/sensors.js'));
 app.use(require('./routes/budget/budget.js'));
 
+// 404, needs to be second last
+app.use(function (req, res, next) {
+    res.status(404);
+    res.json({
+        success: false,
+        status: 404,
+        error: "Not Found",
+    });
+});
+
 // General error handler, needs to be defined AFTER all other routes
 app.use(function (err, req, res, next) {
     res.setHeader('content-type', 'application/json');
