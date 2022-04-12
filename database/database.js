@@ -4,7 +4,7 @@
 
 const { query } = require('express');
 let mysql = require('mysql');
-require('dotenv').config({path: './.env'});
+require('dotenv').config({ path: './.env' });
 const dbURL = process.env['DB_URL'];
 let pool = mysql.createPool(dbURL);
 
@@ -22,7 +22,7 @@ function runQuery(query) {
                 }
             });
         });
-    }); 
+    });
 }
 
 function runQueryValues(query, values) {
@@ -40,11 +40,11 @@ function runQueryValues(query, values) {
 
 /* converts an array of JSON user data into values that can be inserted */
 function sensorType_JSONtoValueString(data) {
-    
+
     let values = '';
 
-    for (let i=0; i< data.length; i++) {
-        if (i!=0) values += ",";
+    for (let i = 0; i < data.length; i++) {
+        if (i != 0) values += ",";
         values += "(\"";
         values += data[i].name + "\"";
         values += ")";
@@ -55,11 +55,11 @@ function sensorType_JSONtoValueString(data) {
 
 /* converts an array of JSON user data into values that can be inserted */
 function sensor_JSONtoValueString(data) {
-    
+
     let values = '';
 
-    for (let i=0; i< data.length; i++) {
-        if (i!=0) values += ",";
+    for (let i = 0; i < data.length; i++) {
+        if (i != 0) values += ",";
         values += "(\"";
         values += data[i].name + "\",";
         values += data[i].sensor_type_id;
@@ -72,11 +72,11 @@ function sensor_JSONtoValueString(data) {
 
 /* converts an array of JSON user data into values that can be inserted */
 function user_JSONtoValueString(data) {
-    
+
     let values = '';
 
-    for (let i=0; i< data.length; i++) {
-        if (i!=0) values += ",";
+    for (let i = 0; i < data.length; i++) {
+        if (i != 0) values += ",";
         values += "(\"";
         values += data[i].username + "\",\"";
         values += data[i].password + "\"";
@@ -182,9 +182,10 @@ let db = module.exports = {
             .then((result) => {
                 if (result[0]) {
                     return result[0].password;
-                } else { 
-                    return null; 
-                }})
+                } else {
+                    return null;
+                }
+            })
             .catch((error) => new Error(error));
 
     },
@@ -241,6 +242,7 @@ let db = module.exports = {
         CREATE TABLE IF NOT EXISTS category (
             id INT NOT NULL AUTO_INCREMENT,
             name VARCHAR(255) NOT NULL,
+            active BOOLEAN NOT NULL DEFAULT 1,
             user_id INT NOT NULL,
             PRIMARY KEY (id),
             FOREIGN KEY (user_id) REFERENCES user(id)
@@ -271,9 +273,9 @@ let db = module.exports = {
             PRIMARY KEY (id),
             FOREIGN KEY (category_id) REFERENCES category(id)
         );`
-        let createQuery = 
+        let createQuery =
             q_createTableAccount +
-            q_createTableCategory + 
+            q_createTableCategory +
             q_createTableTransaction +
             q_createTableBudget;
 
@@ -291,26 +293,40 @@ let db = module.exports = {
      */
     createAccount: (account_name, user_id) => {
 
-        let q_insertAccount = `INSERT INTO account (name, user_id) VALUES ("` + account_name + `",` + user_id + `);`;
+        let q_insertAccount = `INSERT INTO account (name, user_id) VALUES ("` + account_name + `",` + user_id + `) OUTPUT INSERTED.Id;`;
 
         return runQuery(q_insertAccount)
-            .then(() => 'Success')
+            .then((result) => result)
             .catch((error) => new Error(error));
 
     },
 
     /**
      * Updates the given account with the given name and/or status
-     * @param { number } account_id 
-     * @param { string } account_name 
-     * @param { boolean } active 
+     * @param { object } account
+     * @param { number } user_id
      * @returns { Promise } of 'Success' | Error
      */
-    updateAccount(account_id, account_name, active) {
+    updateAccount(account, user_id) {
 
-        let q_updateAccount = `UPDATE account SET name = "` + account_name + `", active = ` + active ` WHERE id = ` + account_id + `;`;
+        let q_updateAccount = `UPDATE account SET name = "${account.name}", active = ${account.active} WHERE id = ${account.id} AND user_id = ${user_id};`;
 
         return runQuery(q_updateAccount)
+            .then(() => 'Success')
+            .catch((error) => new Error(error));
+
+    },
+
+    /**
+     * Deletes the given account for the given user 
+     * @param { number } account_id 
+     * @returns { Promise } of 'Success' | Error
+     */
+    deleteAccount: (account_id, user_id) => {
+
+        let q_deleteAccount = `DELETE FROM account WHERE id = ${account_id} AND user_id = ${user_id};`;
+
+        return runQuery(q_deleteAccount)
             .then(() => 'Success')
             .catch((error) => new Error(error));
 
@@ -324,7 +340,7 @@ let db = module.exports = {
      */
     createCategory: (category_name, user_id) => {
 
-        let q_insertCategory = `INSERT INTO category SET name = "` + category_name + `" WHERE id = ` + user_id + `;`;
+        let q_insertCategory = `INSERT INTO category (name, user_id) VALUES ("` + category_name + `", ` + user_id + `);`;
 
         return runQuery(q_insertCategory)
             .then(() => 'Success')
@@ -338,9 +354,9 @@ let db = module.exports = {
      * @param { string } category_name 
      * @returns { Promise } of 'Success' | Error
      */
-    updateCategory: (category_id, category_name) => {
+    updateCategory: (category_id, category_name, active) => {
 
-        let q_updateCategory = `UPDATE category SET name = "` + category_name + `" WHERE id = ` + category_id + `;`;
+        let q_updateCategory = `UPDATE category SET name = "` + category_name + `", active = ` + active + ` WHERE id = ` + category_id + `;`;
 
         return runQuery(q_updateCategory)
             .then(() => 'Success')
@@ -356,16 +372,19 @@ let db = module.exports = {
      */
     createTransaction: (transaction, user_id) => {
 
+        let date = transaction.date == null ? new Date().toISOString().slice(0, 19).replace('T', ' ') : transaction.date;
+        let notes = transaction.notes == null ? '' : transaction.notes;
+
         let q_insertTransaction = `INSERT INTO transaction (user_id, account_id, category_id, payee_id, date, amount, cleared, notes) VALUES (` +
             user_id + `,` +
             transaction.account_id + `,` +
             transaction.category_id + `,` +
-            transaction.payee_id + `,` +
-            `"${transaction.date}",` +
+            (transaction.payee_id == null ? 'NULL,' : + transaction.payee_id + `,`) +
+            `"${date}",` +
             transaction.amount + `,` +
-            transaction.cleared + `,` +
-            `"${transaction.notes}");`;
-    
+            (transaction.cleared == null ? 'TRUE,' : transaction.cleared + `,`) +
+            `"${notes}");`;
+
         return runQuery(q_insertTransaction)
             .then(() => 'Success')
             .catch((error) => new Error(error));
@@ -424,7 +443,7 @@ let db = module.exports = {
         return runQuery(q_updateBudgetMonth)
             .then(() => 'Success')
             .catch((error) => new Error(error));
-        
+
     },
 
     /**
@@ -433,7 +452,7 @@ let db = module.exports = {
      */
     getAllTransactions: (user_id) => {
 
-        let q_getTransactions = 
+        let q_getTransactions =
             `SELECT 
                 date, 
                 amount, 
@@ -447,12 +466,51 @@ let db = module.exports = {
             INNER JOIN account ON transaction.account_id = account.id 
             LEFT JOIN account AS payee ON transaction.payee_id = account.id 
             WHERE transaction.user_id = ${user_id}`;
-        console.log(user_id);
-        console.log(q_getTransactions);
 
         return runQuery(q_getTransactions)
             .then((result) => {
-                console.log(result);
+                return result
+            })
+            .catch((error) => new Error(error));
+    },
+
+    /**
+     * Get all the transactions for a given user
+     * @param { number } user_id 
+     */
+    getAllAccounts: (user_id) => {
+
+        let q_getAccounts =
+            `SELECT 
+                id, 
+                name, 
+                active
+            FROM account
+            WHERE user_id = ${user_id}`;
+
+        return runQuery(q_getAccounts)
+            .then((result) => {
+                return result
+            })
+            .catch((error) => new Error(error));
+    },
+
+    /**
+     * Get all the transactions for a given user
+     * @param { number } user_id 
+     */
+    getAllCategories: (user_id) => {
+
+        let q_getCategories =
+            `SELECT 
+                id, 
+                name, 
+                active
+            FROM category
+            WHERE user_id = ${user_id}`;
+
+        return runQuery(q_getCategories)
+            .then((result) => {
                 return result
             })
             .catch((error) => new Error(error));
@@ -508,7 +566,7 @@ let db = module.exports = {
 
         if (data && data.sensor_type) insertSensorTypeQuery = q_insertSensorType + sensorType_JSONtoValueString(data.sensor_type);
         if (data && data.sensor) insertSensorQuery = q_insertSensor + sensor_JSONtoValueString(data.sensor);
-        
+
         return runQuery(q_createSensorTypeTable + q_createSensorTable + q_createSensorDataTable)
             .then((result) => {
                 console.log('---initSensorDatabase Create Success');
@@ -566,7 +624,7 @@ let db = module.exports = {
                 console.log(result);
                 return db.destroyUserDatabase();
             })
-            .then ((result) => {
+            .then((result) => {
                 console.log(result);
                 return db.initUserDatabase(data);
             })

@@ -1,0 +1,41 @@
+{
+    "accountCreateSchema": {
+        "description": "The expected body of the POST request to create an account",
+        "type": "object",
+        "properties": {
+            "name": { 
+                "type": "string"
+            },
+            "active": {
+                "type": "boolean"
+            }
+        },
+        "required": ["name"]
+    },
+    "accountUpdateSchema" : {
+        "description": "The expected body of the POST request to create an account",
+        "type": "object",
+        "properties": {
+            "id": {
+                "type": "integer"
+            },
+            "name": { 
+                "type": "string"
+            },
+            "active": {
+                "type": "boolean"
+            }
+        },
+        "required": ["id", "active"]
+    },
+    "accountDeleteSchema": {
+        "description": "The expected body of the POST request to create an account",
+        "type": "object",
+        "properties": {
+            "id": {
+                "type": "integer"
+            }
+        },
+        "required": ["id"]
+    }
+}
