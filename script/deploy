@@ -1,5 +1,6 @@
 #!/bin/sh
 cd ~/node-app
+git checkout -- .
 git pull
 [ $? -eq 0 ] || exit 1
 npm install -—production
