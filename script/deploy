@@ -1,10 +1,10 @@
 #!/bin/sh
-cd ~/server-app
+cd ~/node-app
 git checkout -- .
 git pull
 [ $? -eq 0 ] || exit 1
 npm install -—production
 [ $? -eq 0 ] || exit 1
-(pm2 restart server-app) || (pm2 start index.js --name "server-app")
+(pm2 restart node-app) || (pm2 start index.js --name "node-app")
 [ $? -eq 0 ] || exit 1
 exit 0
