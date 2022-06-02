@@ -26,7 +26,7 @@
         "morgan": "^1.9.1",
         "mysql": "^2.18.1",
         "nodemon": "^2.0.14",
-        "npm": "^8.6.0"
+        "npm": "^8.11.0"
     },
     "devDependencies": {
         "chai": "^4.2.0",
