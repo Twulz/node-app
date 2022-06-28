@@ -61,7 +61,7 @@ router.post('/login', [
                         );
                         // return the JWT token for the future API calls
                         res.cookie("token", JSON.stringify(token), {
-                            secure: process.env.NODE_ENV !== "development", // https unavailable on localhost
+                            secure: process.env.SECURE_COOKIE === "true", // https unavailable on localhost
                             httpOnly: true,
                             withCredentials: true,
                             maxAge: 8 * 60 * 60 * 1000  // 8 hours
