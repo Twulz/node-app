@@ -14,7 +14,7 @@ Insert sensor data
 */
 router.post('/smartHome/sensor/:id', [
     param('id').exists().isInt(),
-    query('value').exists().isInt()], async (req, res, next) => {
+    query('value').exists().isDecimal()], async (req, res, next) => {
         try {
             const inputResult = validationResult(req);
             if (inputResult.isEmpty()) {

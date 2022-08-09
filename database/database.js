@@ -553,7 +553,7 @@ let db = module.exports = {
                 id INT NOT NULL AUTO_INCREMENT,
                 created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 sensor_id INT NOT NULL,
-                value INT NOT NULL,
+                value DECIMAL(12,6) NOT NULL,
                 PRIMARY KEY (id),
                 FOREIGN KEY (sensor_id) REFERENCES sensor(id)
             );`;
