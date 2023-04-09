@@ -6,13 +6,21 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
 let app = express();
+
+app.use(cors({
+    origin: ["http://127.0.0.1:3000","http://localhost:3000"],
+    methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
+    credentials: true,
+    preflightContinue: true,
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie", "X-Set-Cookie"],
+    exposedHeaders: ["Authorization", "X-Set-Cookie", "Content-Type"]
+}));
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(expressSanitizer());
 app.use(cookieParser());
 app.use(logger('dev'));
-
-app.use(cors());
 
 app.use(require('./routes/general/authentication.js'));
 app.use(require('./handlers/authHandler.js'));

@@ -10,7 +10,6 @@ require('util');
 
 const secret = process.env['SECRET'];
 const logging = process.env['LOGGING'];
-const dbURL = process.env['DB_URL'];
 
 const saltRounds = 10;
 
@@ -64,8 +63,10 @@ router.post('/login', [
                             secure: process.env.SECURE_COOKIE === "true", // https unavailable on localhost
                             httpOnly: true,
                             withCredentials: true,
-                            maxAge: 8 * 60 * 60 * 1000  // 8 hours
-                          });
+                            maxAge: 8 * 60 * 60 * 1000,  // 8 hours
+                            sameSite: "None",
+                            path: "/",
+                        });
                         res.statusCode = 200;
                         res.json({
                             success: true,
