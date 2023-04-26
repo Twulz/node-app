@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../../database/database.js');
+const db = require('../../database/smartHome/sensors');
 const { param, query, validationResult } = require('express-validator');
 const logging = process.env['LOGGING'];
 

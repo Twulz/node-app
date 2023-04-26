@@ -2,10 +2,9 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const db = require('../../database/database');
+const db = require('../../database/user/userDB');
 const { check, validationResult } = require('express-validator');
 
-require('dotenv').config({path: './.env'});
 require('util');
 
 const secret = process.env['SECRET'];

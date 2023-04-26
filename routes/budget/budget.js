@@ -1,14 +1,12 @@
 const Ajv = require('ajv');
 const express = require('express');
 const router = express.Router();
-const db = require('../../database/database');
+const db = require('../../database/budget/budgetDB');
 
 // JSON Schemas
 const { transactionSchema } = require('./schemas/transaction.json');
 const accountSchema = require('./schemas/account.json');
 const categorySchema = require('./schemas/category.json');
-
-require('dotenv').config({path: './.env'});
 
 const logging = true;
 const dbURL = process.env['DB_URL'];

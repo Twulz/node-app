@@ -2,8 +2,7 @@
  * Initialises the tables in the database if they don't exist and inserts initial data
  * Intended for recreating a test environment
  */
+const init = require('../utils/init');
+const testData = require('./data/testData');
 
-const db = require('./database.js');
-const initData = require('./initData');
-
-db.cleanInit(initData);
+init.init(testData);

@@ -1,4 +1,3 @@
-require('dotenv').config({path: './.env'});
 const express = require('express');
 const logger = require('morgan');
 const expressSanitizer = require('express-sanitizer');

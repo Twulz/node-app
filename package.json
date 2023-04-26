@@ -4,14 +4,15 @@
     "version": "0.0.3",
     "private": true,
     "scripts": {
+        "start": "node index.js",
         "start-dev": "nodemon index.js",
-        "initDB": "node ./database/init.js",
-        "cleanDB": "node ./database/clean.js",
-        "cleanTest": "node ./database/cleanTest.js",
-        "initTestDB": "node ./database/initTest.js",
-        "test": "mocha --recursive --timeout 100000 --exit",
-        "dev-server": "./node_modules/.bin/node-dev ./index.js",
-        "initSensorDB": "node ./database/initSensors.js"
+        "test-dev": "set \"NODE_ENV=test\" && mocha --recursive --timeout 100000 --exit",
+        "test": "NODE_ENV=test mocha --recursive --timeout 100000 --exit",
+        "initTestDB": "NODE_ENV=test node ./database/scripts/initTest.js",
+        "initTestDB-dev": "set \"NODE_ENV=test\" && node ./database/scripts/initTest.js",
+        "initDataDB": "node ./database/scripts/initData.js",
+        "initCleanDB": "node ./database/scripts/initClean.js",
+        "initSensorDB": "node ./database/scripts/initSensors.js"
     },
     "dependencies": {
         "ajv": "^6.12.3",
