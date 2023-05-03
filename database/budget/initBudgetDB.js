@@ -1,8 +1,11 @@
 const dbUtils = require('../utils/utils');
+const accountUtils = require('./accounts');
+const categoryUtils = require('./categories');
+const transactionUtils = require('./transactions');
 
 module.exports = {
 
-  destroyBudgetDatabase() {
+  destroyBudgetTables() {
 
     let q_dropTableBudget = `DROP TABLE IF EXISTS budget;`;
     let q_dropTableTransaction = `DROP TABLE IF EXISTS transaction;`;
@@ -10,11 +13,14 @@ module.exports = {
     let q_dropTableAccount = `DROP TABLE IF EXISTS account;`;
 
     return dbUtils.runQuery(q_dropTableBudget + q_dropTableTransaction + q_dropTableCategory + q_dropTableAccount)
-      .then(() => '---destroyBudgetDatabase Drop Success')
-      .catch((error) => new Error(error));
+      .then(result => {
+        console.log('---destroyBudgetDatabase Drop Success');
+        return result;
+      })
+      .catch(error => new Error(error));
   },
 
-  initBudgetDatabase() {
+  initBudgetTables(data) {
 
     let q_createTableAccount = `
       CREATE TABLE IF NOT EXISTS account (
@@ -67,8 +73,22 @@ module.exports = {
       q_createTableBudget;
 
     return dbUtils.runQuery(createQuery)
-      .then(() => '---initBudgetDatabase Create Success')
-      .catch((error) => new Error(error));
+      .then(result => {
+        console.log('---initBudgetDatabase Create Success');
+        return (data && data.account) ? accountUtils.createAccounts(data.account) : result;
+      })
+      .then(result => {
+        console.log('---initBudgetDatabase Insert Accounts Success');
+        return (data && data.category) ? categoryUtils.createCategories(data.category) : result;
+      })
+      .then(result => {
+        console.log('---initBudgetDatabase Insert Categories Success');
+        return (data && data.transaction) ? transactionUtils.createTransactions(data.transaction) : result;
+      })
+      .catch(error => {
+        console.log(error);
+        return new Error(error)
+      });
 
   },
 }

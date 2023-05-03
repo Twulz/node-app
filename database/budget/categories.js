@@ -17,10 +17,10 @@ module.exports = {
       WHERE user_id = ${user_id}`;
 
     return dbUtils.runQuery(q_getCategories)
-      .then((result) => {
+      .then(result => {
         return result
       })
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
   },
 
   /**
@@ -35,7 +35,26 @@ module.exports = {
 
     return dbUtils.runQuery(q_insertCategory)
       .then(() => 'Success')
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
+
+  },
+
+  /**
+   * Creates an account for the given user 
+   * @param { object } account: Account data
+   * @returns { Promise } of 'Success' | Error
+   */
+  createCategories(categories) {
+
+    let q_insertCategories = `INSERT INTO category (name, user_id) VALUES `;
+    categories.forEach((category, index) => {
+      q_insertCategories += `("` + category.name + `",` + category.user_id + `)`;
+      q_insertCategories += index == categories.length-1 ? ";" : ",";
+    });
+
+    return dbUtils.runQuery(q_insertCategories)
+      .then(result => result)
+      .catch(error => new Error(error));
 
   },
 
@@ -51,7 +70,7 @@ module.exports = {
 
     return dbUtils.runQuery(q_updateCategory)
       .then(() => 'Success')
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
 
   }
 

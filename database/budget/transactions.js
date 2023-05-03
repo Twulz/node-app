@@ -25,7 +25,36 @@ module.exports = {
 
     return dbUtils.runQuery(q_insertTransaction)
       .then(() => 'Success')
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
+
+  },
+
+  /**
+   * Create transactions with the given parameters
+   * @param { object } transactions
+   * @returns { Promise } of 'Success' | Error
+   */
+  createTransactions(transactions) {
+
+    let q_insertTransaction = `INSERT INTO transaction (user_id, account_id, category_id, payee_id, date, amount, cleared, notes) VALUES `;
+
+    transactions.forEach((transaction, index) => {
+      q_insertTransaction += `(
+        ${transaction.user_id},
+        ${transaction.account_id},
+        ${transaction.category_id},
+        ${transaction.payee_id == null ? 'NULL' : transaction.payee_id},
+        "${transaction.date}",
+        ${transaction.amount},
+        ${transaction.cleared == null ? 'TRUE' : transaction.cleared},
+        "${transaction.notes}"
+      )`;
+      q_insertTransaction += index == transactions.length-1 ? ";" : ",";
+    });      
+
+    return dbUtils.runQuery(q_insertTransaction)
+      .then(result => result)
+      .catch(error => new Error(error));
 
   },
 
@@ -47,7 +76,7 @@ module.exports = {
 
     return dbUtils.runQuery(q_updateTransaction)
       .then(() => 'Success')
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
 
   },
 
@@ -63,7 +92,7 @@ module.exports = {
 
     return dbUtils.runQuery(q_insertBudgetMonth)
       .then(() => 'Success')
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
 
   },
 
@@ -80,7 +109,7 @@ module.exports = {
 
     return dbUtils.runQuery(q_updateBudgetMonth)
       .then(() => 'Success')
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
 
   },
 
@@ -106,10 +135,10 @@ module.exports = {
       WHERE transaction.user_id = ${user_id}`;
 
     return dbUtils.runQuery(q_getTransactions)
-      .then((result) => {
+      .then(result => {
         return result;
       })
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
   },
 
 }

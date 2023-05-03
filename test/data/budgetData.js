@@ -17,13 +17,5 @@ module.exports = {
   budget: [
     { amount: 1000, date: 2023-05-01, category_id: 1 },
     { amount: 400, date: 2023-05-01, category_id: 2 }
-  ],
-  sensor_type: [
-    { name: 'Capacitive Moisture' },
-    { name: 'Resistive Moisture' }
-  ],
-  sensor: [
-    { name: 'Cap Moisture 1', sensor_type_id: 1 },
-    { name: 'Res Moisture 1', sensor_type_id: 2 }
   ]
 }

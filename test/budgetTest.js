@@ -2,23 +2,21 @@ const request = require('supertest');
 const app = require('../index.js');
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const db = require('../database/smartHome/smartHomeDB');
-const testData = require('./data/smartHomeData');
+const db = require('../database/budget/budgetDB');
+const testData = require('./data/budgetData');
 
 const { expect } = chai;
 chai.use(chaiHttp);
 
-describe('SensorTest', function () {
+describe('BudgetTest', function () {
 
   before(function () {
-    return db.initSmartHome(testData);
+    return db.initBudgetDatabase(testData);
   });
 
-  describe('POST /smartHome/sensor/:id SUCCESS', function () {
+  describe('GET /budget/transactions/ SUCCESS', function () {
 
     let token = null;
-    let sensorId = 1;
-    let value = 500;
 
     before(function () {
       return request(app)
@@ -34,20 +32,19 @@ describe('SensorTest', function () {
 
     it('Respond with success', function () {
       return request(app)
-        .post('/smartHome/sensor/' + sensorId)
-        .query({ value: value })
+        .get('/budget/transactions/')
         .set('Cookie', 'token=' + token)
         .set({ 'Accept': 'application/json' })
         .then(res => {
           expect(res).to.exist;
-          expect(res.statusCode).to.equal(201);
-          expect(res.body.response).to.include('Success');
+          expect(res.statusCode).to.equal(200);
+          expect(res.body.transactions).to.exist;
         });
     });
   });
 
   after(function () {
-    return db.destroySmartHome();
+    return db.destroyBudgetDatabase();
   });
 
 });

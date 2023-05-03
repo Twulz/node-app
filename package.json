@@ -12,7 +12,8 @@
         "initTestDB-dev": "set \"NODE_ENV=test\" && node ./database/scripts/initTest.js",
         "initDataDB": "node ./database/scripts/initData.js",
         "initCleanDB": "node ./database/scripts/initClean.js",
-        "initSensorDB": "node ./database/scripts/initSensors.js"
+        "initSensorDB": "node ./database/scripts/initSensors.js",
+        "destroyAllDB-dev": "set \"NODE_ENV=test\" && node ./database/scripts/destroyAll.js"
     },
     "dependencies": {
         "ajv": "^6.12.3",

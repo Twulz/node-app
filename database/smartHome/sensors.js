@@ -1,6 +1,6 @@
 let dbUtils = require('../utils/utils');
 
-/* Converts an array of JSON user data into values that can be inserted */
+/* Converts an array of JSON sensor data into values that can be inserted */
 function sensorType_JSONtoValueString(data) {
 
   let values = '';
@@ -15,7 +15,7 @@ function sensorType_JSONtoValueString(data) {
 
 }
 
-/* Converts an array of JSON user data into values that can be inserted */
+/* Converts an array of JSON sensor data into values that can be inserted */
 function sensor_JSONtoValueString(data) {
 
   let values = '';
@@ -32,7 +32,7 @@ function sensor_JSONtoValueString(data) {
 
 }
 
-let db = module.exports = {
+module.exports = {
 
   destroySensorDatabase() {
 
@@ -41,8 +41,11 @@ let db = module.exports = {
     let q_dropTableSensorType = 'DROP TABLE IF EXISTS sensor_type;';
 
     return dbUtils.runQuery(q_dropTableSensorData + q_dropTableSensor + q_dropTableSensorType)
-      .then(() => '---destroySensorDatabase Drop Success')
-      .catch((error) => new Error(error));
+      .then(result => {
+        console.log('---destroySensorDatabase Drop Success');
+        return result;
+      })
+      .catch(error => new Error(error));
 
   },
 
@@ -82,18 +85,18 @@ let db = module.exports = {
     if (data && data.sensor) insertSensorQuery = q_insertSensor + sensor_JSONtoValueString(data.sensor);
 
     return dbUtils.runQuery(q_createSensorTypeTable + q_createSensorTable + q_createSensorDataTable)
-      .then((result) => {
+      .then(result => {
         console.log('---initSensorDatabase Create Success');
-        if (data && data.sensor_type) return dbUtils.runQuery(insertSensorTypeQuery);
+        return (data && data.sensor_type) ? dbUtils.runQuery(insertSensorTypeQuery) : result;
       })
-      .then((result) => {
+      .then(result => {
         console.log('---initSensorDatabase Insert Sensor Type Success');
-        if (data && data.sensor) return dbUtils.runQuery(insertSensorQuery);
+        return (data && data.sensor) ? dbUtils.runQuery(insertSensorQuery) : result;
       })
-      .then((result) => {
+      .then(result => {
         console.log('---initSensorDatabase Insert Sensor Success');
+        return result;
       })
-      .then(() => 'Success')
       .catch((error) => new Error(error));
 
   },
@@ -104,7 +107,7 @@ let db = module.exports = {
 
     return dbUtils.runQuery(query)
       .then(() => 'Success')
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
 
   },
 
@@ -114,7 +117,7 @@ let db = module.exports = {
 
     return dbUtils.runQuery(query)
       .then(() => 'Success')
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
 
   },
 
@@ -124,7 +127,7 @@ let db = module.exports = {
 
     return dbUtils.runQuery(query)
       .then(() => 'Success')
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
 
   },
 

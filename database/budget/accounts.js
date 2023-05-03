@@ -17,10 +17,10 @@ module.exports = {
       WHERE user_id = ${user_id}`;
 
     return dbUtils.runQuery(q_getAccounts)
-      .then((result) => {
+      .then(result => {
         return result
       })
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
   },
 
   /**
@@ -34,8 +34,27 @@ module.exports = {
     let q_insertAccount = `INSERT INTO account (name, user_id) VALUES ("` + account_name + `",` + user_id + `) OUTPUT INSERTED.Id;`;
 
     return dbUtils.runQuery(q_insertAccount)
-      .then((result) => result)
-      .catch((error) => new Error(error));
+      .then(result => result)
+      .catch(error => new Error(error));
+
+  },
+
+  /**
+   * Creates an account for the given user 
+   * @param { object } account: Account data
+   * @returns { Promise } of 'Success' | Error
+   */
+  createAccounts(accounts) {
+
+    let q_insertAccounts = `INSERT INTO account (name, user_id) VALUES `;
+    accounts.forEach((account, index) => {
+      q_insertAccounts += `("` + account.name + `",` + account.user_id + `)`;
+      q_insertAccounts += index == accounts.length-1 ? ";" : ",";
+    });
+
+    return dbUtils.runQuery(q_insertAccounts)
+      .then(result => result)
+      .catch(error => new Error(error));
 
   },
 
@@ -51,7 +70,7 @@ module.exports = {
 
     return dbUtils.runQuery(q_updateAccount)
       .then(() => 'Success')
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
 
   },
 
@@ -66,7 +85,7 @@ module.exports = {
 
     return dbUtils.runQuery(q_deleteAccount)
       .then(() => 'Success')
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
 
   }
 

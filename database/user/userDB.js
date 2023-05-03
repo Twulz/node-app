@@ -30,8 +30,11 @@ module.exports = {
     let q_dropTableUser = `DROP TABLE IF EXISTS user;`;
 
     return dbUtils.runQuery(q_dropTableUser)
-      .then(() => '---destroyUserDatabase Drop Success')
-      .catch((error) => new Error(error));
+      .then(result => {
+        console.log('---destroyUserDatabase Drop Success');
+        return result;
+      })
+      .catch(error => new Error(error));
 
   },
 
@@ -54,13 +57,15 @@ module.exports = {
     if (data && data.user) q_insertUser_full = `INSERT INTO user (username, password, app_access) VALUES ` + user_JSONtoValueString(data.user);
 
     return dbUtils.runQuery(q_createTableUser)
-      .then((result) => {
+      .then(result => {
         console.log('---initUserDatabase Create Success');
-        // Insert given data
-        if (data && data.user) return dbUtils.runQuery(q_insertUser_full);
+        return (data && data.user) ? dbUtils.runQuery(q_insertUser_full) : result;
       })
-      .then(() => '---initUserDatabase Insert Success')
-      .catch((error) => new Error(error));
+      .then(result => {
+        console.log('---initUserDatabase Insert Success');
+        return result;
+      })
+      .catch(error => new Error(error));
 
   },
 
@@ -75,8 +80,8 @@ module.exports = {
     let q_insertUser = `INSERT INTO user (username, password) VALUES ("` + username + `","` + password + `");`;
 
     return dbUtils.runQuery(q_insertUser)
-      .then((result) => 'Success')
-      .catch((error) => new Error(error));
+      .then(() => 'Success')
+      .catch(error => new Error(error));
 
   },
 
@@ -90,8 +95,8 @@ module.exports = {
     let q_deleteUser = `DELETE FROM user WHERE username = "` + username + `"`;
 
     return dbUtils.runQuery(q_deleteUser)
-      .then((result) => 'Success')
-      .catch((error) => new Error(error));
+      .then(() => 'Success')
+      .catch(error => new Error(error));
 
   },
 
@@ -105,14 +110,14 @@ module.exports = {
     let query = `SELECT password FROM user WHERE username = "` + username + `"`;
 
     return dbUtils.runQuery(query)
-      .then((result) => {
+      .then(result => {
         if (result[0]) {
           return result[0].password;
         } else {
           return null;
         }
       })
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
 
   },
 
@@ -126,14 +131,14 @@ module.exports = {
     let query = `SELECT id, app_access FROM user WHERE username = "` + username + `"`;
 
     return dbUtils.runQuery(query)
-      .then((result) => {
+      .then(result => {
         if (result[0]) {
           return result[0];
         } else {
           throw new Error('User not found');
         }
       })
-      .catch((error) => new Error(error));
+      .catch(error => new Error(error));
 
   },
 }
