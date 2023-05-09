@@ -17,9 +17,6 @@ module.exports = {
       WHERE user_id = ${user_id}`;
 
     return dbUtils.runQuery(q_getCategories)
-      .then(result => {
-        return result
-      })
       .catch(error => new Error(error));
   },
 
@@ -34,7 +31,6 @@ module.exports = {
     let q_insertCategory = `INSERT INTO category (name, user_id) VALUES ("` + category_name + `", ` + user_id + `);`;
 
     return dbUtils.runQuery(q_insertCategory)
-      .then(() => 'Success')
       .catch(error => new Error(error));
 
   },
@@ -53,7 +49,6 @@ module.exports = {
     });
 
     return dbUtils.runQuery(q_insertCategories)
-      .then(result => result)
       .catch(error => new Error(error));
 
   },
@@ -69,7 +64,6 @@ module.exports = {
     let q_updateCategory = `UPDATE category SET name = "` + category_name + `", active = ` + active + ` WHERE id = ` + category_id + `;`;
 
     return dbUtils.runQuery(q_updateCategory)
-      .then(() => 'Success')
       .catch(error => new Error(error));
 
   }

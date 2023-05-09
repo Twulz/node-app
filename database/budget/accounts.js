@@ -31,29 +31,34 @@ module.exports = {
    */
   createAccount(account_name, user_id) {
 
-    let q_insertAccount = `INSERT INTO account (name, user_id) VALUES ("` + account_name + `",` + user_id + `) OUTPUT INSERTED.Id;`;
+    let q_insertAccount = `INSERT INTO account (name, user_id) VALUES ("` + account_name + `",` + user_id + `);`;
 
     return dbUtils.runQuery(q_insertAccount)
-      .then(result => result)
       .catch(error => new Error(error));
 
   },
 
   /**
    * Creates an account for the given user 
-   * @param { object } account: Account data
+   * @param { object } account: Account data in the form
+   * let accounts = [
+   *  [name1, user_id1], 
+   *  [name2, user_id2]
+   *];
    * @returns { Promise } of 'Success' | Error
    */
   createAccounts(accounts) {
 
-    let q_insertAccounts = `INSERT INTO account (name, user_id) VALUES `;
-    accounts.forEach((account, index) => {
-      q_insertAccounts += `("` + account.name + `",` + account.user_id + `)`;
-      q_insertAccounts += index == accounts.length-1 ? ";" : ",";
+    let q_insertAccounts = `INSERT INTO account (name, user_id) VALUES ?;`;
+    let values = [];
+    accounts.forEach(account => {
+      values.push([
+        account.name,
+        account.user_id
+      ]);
     });
 
-    return dbUtils.runQuery(q_insertAccounts)
-      .then(result => result)
+    return dbUtils.runQueryValues(q_insertAccounts, values)
       .catch(error => new Error(error));
 
   },
@@ -66,10 +71,18 @@ module.exports = {
    */
   updateAccount(account, user_id) {
 
-    let q_updateAccount = `UPDATE account SET name = "${account.name}", active = ${account.active} WHERE id = ${account.id} AND user_id = ${user_id};`;
+    let q_updateAccount = `UPDATE account SET`;
+    if (account.name) {
+      q_updateAccount += ` name = "${account.name}"`
+    }
+    if (account.active) {
+      q_updateAccount += (q_updateAccount.slice(-1)==`"`) ? ', ' : '';
+      q_updateAccount += ` active = ${account.active}`
+    }
+
+    q_updateAccount += ` WHERE id = ${account.id} AND user_id = ${user_id};`;
 
     return dbUtils.runQuery(q_updateAccount)
-      .then(() => 'Success')
       .catch(error => new Error(error));
 
   },
@@ -84,7 +97,6 @@ module.exports = {
     let q_deleteAccount = `DELETE FROM account WHERE id = ${account_id} AND user_id = ${user_id};`;
 
     return dbUtils.runQuery(q_deleteAccount)
-      .then(() => 'Success')
       .catch(error => new Error(error));
 
   }

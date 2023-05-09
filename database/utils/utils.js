@@ -24,15 +24,18 @@ module.exports = {
     });
   },
 
-  /* Converts the mysql pool query function into a Promise function, including passing values */
+  /* Converts the mysql pool query function into a Promise function, including passing multiple values */
   runQueryValues(query, values) {
     return new Promise(function (resolve, reject) {
       pool.getConnection((error, connection) => {
         if (error) reject(error);
-        let sql = connection.query(query, [values], (error, result) => {
-          console.log(sql.query);
-          if (error) reject(error);
-          else resolve(result);
+        connection.query(query, [values], (error, result) => {
+          pool.releaseConnection(connection);
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
         })
       })
     })

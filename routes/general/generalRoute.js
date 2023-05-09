@@ -11,7 +11,7 @@ Hello World
     response: { String }
 }
 */
-router.get('/', async (req, res, next) => {
+router.get('/:version(v\\d+)/', async (req, res, next) => {
     try {
         res.setHeader('content-type', 'application/json');
         // if (logging) { console.log("GET request"); }

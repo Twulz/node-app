@@ -24,7 +24,6 @@ module.exports = {
       `"${notes}");`;
 
     return dbUtils.runQuery(q_insertTransaction)
-      .then(() => 'Success')
       .catch(error => new Error(error));
 
   },
@@ -53,7 +52,6 @@ module.exports = {
     });      
 
     return dbUtils.runQuery(q_insertTransaction)
-      .then(result => result)
       .catch(error => new Error(error));
 
   },
@@ -75,7 +73,6 @@ module.exports = {
       + `,amount=` + amount + `,cleared=` + cleared + `,notes="` + notes + `" WHERE id=` + transaction_id + `;`;
 
     return dbUtils.runQuery(q_updateTransaction)
-      .then(() => 'Success')
       .catch(error => new Error(error));
 
   },
@@ -91,7 +88,6 @@ module.exports = {
     let q_insertBudgetMonth = `INSERT INTO budget (category_id, amount, date) VALUES (` + category_id + `,` + amount + `,` + date + `);`;
 
     return dbUtils.runQuery(q_insertBudgetMonth)
-      .then(() => 'Success')
       .catch(error => new Error(error));
 
   },
@@ -108,7 +104,6 @@ module.exports = {
     let q_updateBudgetMonth = `UPDATE budget SET category_id=` + category_id + `,amount=` + amount + `,date=` + date + ` WHERE id=` + budget_id;
 
     return dbUtils.runQuery(q_updateBudgetMonth)
-      .then(() => 'Success')
       .catch(error => new Error(error));
 
   },
@@ -135,9 +130,6 @@ module.exports = {
       WHERE transaction.user_id = ${user_id}`;
 
     return dbUtils.runQuery(q_getTransactions)
-      .then(result => {
-        return result;
-      })
       .catch(error => new Error(error));
   },
 

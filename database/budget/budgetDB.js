@@ -21,7 +21,7 @@ module.exports = {
         return (data && data.user) ? userDB.initUserDatabase(data) : result;
       })
       .then(result => {
-        return (data && data.user) ? userDB.initUserDatabase(data) : result;
+        return (data) ? initBudget.initBudgetTables(data) : result;
       })
       .catch(error => {
         console.log(error);

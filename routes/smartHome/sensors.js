@@ -12,7 +12,7 @@ Insert sensor data
     response: { String }
 }
 */
-router.post('/smartHome/sensor/:id', [
+router.post('/smartHome/:version(v\\d+)/sensor/:id', [
     param('id').exists().isInt(),
     query('value').exists().isDecimal()], async (req, res, next) => {
         try {

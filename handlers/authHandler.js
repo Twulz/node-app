@@ -16,12 +16,7 @@ Checks whether the request has a valid JWT token, returns error if not
 var checkToken = function(req, res, next) {
     let token = req.cookies.token;
     if (token) {
-        // Remove Bearer from string
-        if (token.startsWith('Bearer ')) {
-            token = token.slice(7, token.length);
-        } 
-        // Remove quotes around token
-        else if (token.startsWith('"')) {
+        if (token.startsWith('"')) {
             token = token.substring(1, token.length-1);
         }
         jwt.verify(token, secret, (err, decoded) => {

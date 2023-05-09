@@ -73,16 +73,22 @@ module.exports = {
    * Registers a new user with the given username and password
    * @param { string } username: The username (email address) of the user
    * @param { CHAR(60) } password: A salted hash generated from the user's inputted password
-   * @returns { Promise } of 'Success' | Error
+   * @returns { Boolean } true: Success, null: username exists, false: error
    */
   registerUser(username, password) {
 
     let q_insertUser = `INSERT INTO user (username, password) VALUES ("` + username + `","` + password + `");`;
 
     return dbUtils.runQuery(q_insertUser)
-      .then(() => 'Success')
-      .catch(error => new Error(error));
-
+      .then(() => true)
+      .catch(error => { 
+        switch(error.code) {
+          case 'ER_DUP_ENTRY':
+            return null;
+          default:
+            return false;
+        }
+      });
   },
 
   /** 

@@ -4,37 +4,37 @@ const chai = require('chai');
 const chaiHttp = require('chai-http');
 const db = require('../database/smartHome/smartHomeDB');
 const testData = require('./data/smartHomeData');
+const utils = require('./utils/utils');
 
 const { expect } = chai;
 chai.use(chaiHttp);
 
+const path = '/smartHome';
+const version = '/v1';
+
 describe('SensorTest', function () {
 
+  let token = null;
+
   before(function () {
-    return db.initSmartHome(testData);
+    return db.initSmartHome(testData)
+      .then(() => {
+        return utils.getToken(request, app, version);
+      })
+      .then(recToken => {
+        token = recToken;
+      })
+      .catch(err => { console.log(err) });
   });
 
-  describe('POST /smartHome/sensor/:id SUCCESS', function () {
+  describe('POST /sensor/:id SUCCESS', function () {
 
-    let token = null;
     let sensorId = 1;
     let value = 500;
 
-    before(function () {
-      return request(app)
-        .post('/login')
-        .send({ username: 'testuser@email.com', password: 'password' })
-        .then(res => {
-          token = res.header['set-cookie'][0];
-          if (token != null) {
-            token = token.slice(9, 153);
-          }
-        });
-    });
-
     it('Respond with success', function () {
       return request(app)
-        .post('/smartHome/sensor/' + sensorId)
+        .post(path+version+'/sensor/' + sensorId)
         .query({ value: value })
         .set('Cookie', 'token=' + token)
         .set({ 'Accept': 'application/json' })
