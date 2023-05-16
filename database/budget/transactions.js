@@ -126,8 +126,9 @@ module.exports = {
       FROM transaction 
       INNER JOIN category ON transaction.category_id = category.id 
       INNER JOIN account ON transaction.account_id = account.id 
-      LEFT JOIN account AS payee ON transaction.payee_id = account.id 
-      WHERE transaction.user_id = ${user_id}`;
+      LEFT JOIN account AS payee ON transaction.payee_id = payee.id 
+      WHERE transaction.user_id = ${user_id}
+      ORDER BY date DESC`;
 
     return dbUtils.runQuery(q_getTransactions)
       .catch(error => new Error(error));

@@ -27,14 +27,22 @@ router.post('/budget/:version(v\\d+)/transaction', async (req, res, next) => {
   res.setHeader('content-type', 'application/json');
   if (ajv.validate(transactionSchema, req.body.transaction)) {
     db.createTransaction(req.body.transaction, req.decoded.user_id)
-      .then(transId => {
-        res.statusCode = 200;
-        res.json({
-          success: true,
-          transId: transId
-        });
+      .then(result => {
+        if (result instanceof Error) {
+          res.statusCode = 400;
+          return next('Error creating transaction');
+        } else {
+          res.statusCode = 200;
+          res.json({
+            success: true,
+            transId: result
+          });
+        }
       })
-      .catch(error => next(error));
+      .catch(error => {
+        res.statusCode = 400;
+        next(error);
+      });
   }
   else {
     res.statusCode = 400;
